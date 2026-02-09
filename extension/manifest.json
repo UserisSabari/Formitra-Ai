@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "Formitra AI Assistant",
+    "version": "1.0",
+    "description": "AI-assisted form filler for public service portals.",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.passportindia.gov.in/*",
+                "http://localhost:5173/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ]
+}

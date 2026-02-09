@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 320px;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .popup-container {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .header-icon {
+            font-size: 24px;
+        }
+
+        .header h3 {
+            font-size: 16px;
+            color: #1a237e;
+            margin: 0;
+        }
+
+        .header p {
+            font-size: 11px;
+            color: #999;
+            margin: 0;
+        }
+
+        #stateInfo {
+            margin-bottom: 12px;
+        }
+
+        .state-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        #status {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+            font-size: 13px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-item .label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .status-item .value {
+            color: #1a237e;
+            font-weight: 700;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .no-data p {
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .no-data small {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #fillBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: none;
+        }
+
+        #fillBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        #fillBtn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        #fillBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        #clearBtn {
+            background: #f5f5f5;
+            color: #666;
+            border: 1px solid #ddd;
+            display: none;
+        }
+
+        #clearBtn:hover {
+            background: #eeeeee;
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-top: 8px;
+            padding: 8px;
+            background: #fadbd8;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .footer {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .version {
+            font-size: 10px;
+            color: #bbb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="popup-container">
+        <div class="header">
+            <div class="header-icon">🚀</div>
+            <div>
+                <h3>Formitra AI</h3>
+                <p>Auto-Fill Assistant</p>
+            </div>
+        </div>
+
+        <div id="stateInfo"></div>
+
+        <div id="status">
+            <div class="no-data">
+                <p>Loading...</p>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button id="fillBtn">Fill Application</button>
+            <button id="clearBtn">Clear</button>
+        </div>
+
+        <div class="footer">
+            <p>Ready to auto-fill your government applications</p>
+            <div class="version">v1.0</div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>
