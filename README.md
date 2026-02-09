@@ -54,6 +54,25 @@ npm start
 - [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) - Setup and testing guide
 - [PROJECT_COMPLETION_REPORT.md](PROJECT_COMPLETION_REPORT.md) - Project overview
 
+## ☁️ Deploy to Vercel
+
+The repo is set up to deploy from the **repository root** (no dashboard change needed):
+
+1. Push your code to GitHub and import the repo in [Vercel](https://vercel.com).
+2. Leave **Root Directory** empty (default).
+3. Vercel will use the root `vercel.json` to run `cd client && npm install` and `cd client && npm run build`, and serve `client/dist`.
+4. Redeploy after pushing.
+
+**If the site still doesn’t load:**
+
+- In Vercel → Project → **Settings** → **Build & Development**:
+  - Set **Root Directory** to `client`.
+  - **Build Command:** `npm run build`
+  - **Output Directory:** `dist`
+- Save and trigger a new deployment.
+
+SPA routing is handled by rewrites (all routes → `/index.html`).
+
 ## 🎯 Current Status
 
 - ✅ Passport Services - Fully functional
