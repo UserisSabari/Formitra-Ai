@@ -1,29 +1,44 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, MapPin, Edit3, Send, User, FileText, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, MapPin, Edit3, Send, User, FileText, ArrowLeft, AlertTriangle } from 'lucide-react';
+
+const LOCAL_STORAGE_DOC_VALIDATION_KEY = 'formitra_document_validation';
 
 export default function ReviewPage() {
     const navigate = useNavigate();
     const { serviceId, state } = useParams();
     const decodedState = decodeURIComponent(state);
     const [formData, setFormData] = useState({});
+    const [docValidation, setDocValidation] = useState(null);
 
     useEffect(() => {
-        const saved = localStorage.getItem('formitra_form_data');
-        if (saved) {
+        const savedForm = localStorage.getItem('formitra_form_data');
+        if (savedForm) {
             try { 
-                setFormData(JSON.parse(saved)); 
+                setFormData(JSON.parse(savedForm)); 
             } catch { 
                 navigate('/'); 
             }
         } else { 
             navigate('/'); 
         }
+
+        const savedValidation = localStorage.getItem(LOCAL_STORAGE_DOC_VALIDATION_KEY);
+        if (savedValidation) {
+            try {
+                setDocValidation(JSON.parse(savedValidation));
+            } catch {
+                // if parsing fails, we simply ignore document validation for this session
+                setDocValidation(null);
+            }
+        }
     }, [navigate]);
 
     const handleBack = () => {
-        navigate(`/form/${serviceId}/${encodeURIComponent(decodedState)}?step=2`);
+        // After reviewing, users should return to the document upload step
+        // where they can adjust or re-validate their supporting documents.
+        navigate(`/upload/${serviceId}/${encodeURIComponent(decodedState)}`);
     };
 
     const handleSubmit = () => {
@@ -108,7 +123,7 @@ export default function ReviewPage() {
                 </div>
 
                 {/* Data Card */}
-                <div className="card p-6 md:p-8">
+                <div className="card p-6 md:p-8 space-y-8">
                     <div className="space-y-8">
                         <Section title="Personal Information" icon={User} fields={personalFields} />
                         <div className="divider"></div>
@@ -116,6 +131,80 @@ export default function ReviewPage() {
                         <div className="divider"></div>
                         <Section title="Passport Details" icon={FileText} fields={passportFields} />
                     </div>
+
+                    {docValidation && (
+                        <>
+                            <div className="divider"></div>
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    <FileText size={16} />
+                                    Document Validation Summary
+                                </div>
+
+                                <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 space-y-3">
+                                    <div className="flex items-start gap-2">
+                                        <AlertTriangle size={18} className="text-amber-600 mt-0.5" />
+                                        <p className="text-xs md:text-sm text-gray-800">
+                                            <strong>This is a pre-submission validation, not official verification.</strong>{' '}
+                                            These checks highlight potential issues based on file properties and
+                                            simple matching logic. Only the official passport authorities can
+                                            accept or reject your documents.
+                                        </p>
+                                    </div>
+                                    {docValidation.overallRisk && (
+                                        <div className="rounded-lg bg-white border border-gray-200 p-3 text-xs md:text-sm">
+                                            <p className="font-semibold text-gray-900 mb-1">
+                                                Rejection risk estimate
+                                            </p>
+                                            <p className="text-gray-700 mb-1">
+                                                Level: <span className="font-medium uppercase">{docValidation.overallRisk.level}</span>{' '}
+                                                (score {docValidation.overallRisk.score}/100)
+                                            </p>
+                                            {docValidation.overallRisk.reasons?.length > 0 && (
+                                                <ul className="list-disc list-inside text-gray-700 space-y-0.5 mt-1">
+                                                    {docValidation.overallRisk.reasons.map((reason, index) => (
+                                                        <li key={index}>{reason}</li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs md:text-sm">
+                                        {Object.entries(docValidation.perDocument || {}).map(([key, result]) => (
+                                            <div
+                                                key={key}
+                                                className="rounded-lg bg-white border border-gray-200 p-3 space-y-1"
+                                            >
+                                                <p className="font-semibold text-gray-900">
+                                                    {result.label || key}
+                                                </p>
+                                                <p className="text-gray-700">
+                                                    Status:{' '}
+                                                    <span className="font-medium">
+                                                        {result.status}
+                                                    </span>
+                                                </p>
+                                                {[...(result.basicIssues || []), ...(result.qualityIssues || []), ...(result.consistencyIssues || [])].length > 0 ? (
+                                                    <ul className="list-disc list-inside text-gray-700 space-y-0.5">
+                                                        {[...(result.basicIssues || []), ...(result.qualityIssues || []), ...(result.consistencyIssues || [])].map(
+                                                            (issue, index) => (
+                                                                <li key={index}>{issue}</li>
+                                                            )
+                                                        )}
+                                                    </ul>
+                                                ) : (
+                                                    <p className="text-gray-500">
+                                                        No major issues detected in the basic checks.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 {/* Actions */}
@@ -141,9 +230,11 @@ export default function ReviewPage() {
                     <div className="flex items-start gap-3">
                         <CheckCircle2 size={20} className="text-blue-600 mt-0.5 flex-shrink-0" />
                         <div className="text-sm text-blue-900">
-                            <p className="font-medium mb-1">Ready to auto-fill</p>
+                            <p className="font-medium mb-1">Pre-submission check only</p>
                             <p className="text-blue-700">
-                                After clicking "Proceed to Portal", open the government portal and use the extension to auto-fill your form.
+                                Formitra helps you prepare your data and documents, but it does not perform any official
+                                verification or submit applications on your behalf. Always review the highlighted points
+                                before submitting on the official passport portal.
                             </p>
                         </div>
                     </div>

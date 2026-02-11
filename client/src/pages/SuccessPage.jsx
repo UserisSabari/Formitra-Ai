@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, ExternalLink, ArrowRight, Smartphone, Key, Sparkles, Rocket, Check } from 'lucide-react';
+import { CheckCircle2, ExternalLink, ArrowRight, Smartphone, Key, Sparkles, Rocket, ShieldCheck, AlertTriangle } from 'lucide-react';
+
+const LOCAL_STORAGE_DOC_VALIDATION_KEY = 'formitra_document_validation';
 
 export default function SuccessPage() {
     const navigate = useNavigate();
     const [count, setCount] = useState(3);
     const [showGuide, setShowGuide] = useState(false);
+    const [docValidation, setDocValidation] = useState(null);
+    const [hasExtension, setHasExtension] = useState(false);
 
     useEffect(() => {
         if (count > 0) {
@@ -17,10 +21,30 @@ export default function SuccessPage() {
         }
     }, [count]);
 
+    useEffect(() => {
+        const savedValidation = localStorage.getItem(LOCAL_STORAGE_DOC_VALIDATION_KEY);
+        if (savedValidation) {
+            try {
+                setDocValidation(JSON.parse(savedValidation));
+            } catch {
+                setDocValidation(null);
+            }
+        }
+
+        const extensionFlag = localStorage.getItem('formitra_extension_installed') === 'true';
+        setHasExtension(extensionFlag);
+    }, []);
+
     const handleComplete = () => {
         localStorage.removeItem('formitra_form_data');
         localStorage.removeItem('formitra_form_step');
+        localStorage.removeItem(LOCAL_STORAGE_DOC_VALIDATION_KEY);
         navigate('/');
+    };
+
+    const handleSimulateExtensionInstall = () => {
+        localStorage.setItem('formitra_extension_installed', 'true');
+        setHasExtension(true);
     };
 
     return (
@@ -43,10 +67,10 @@ export default function SuccessPage() {
                 {/* Title */}
                 <div>
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                        Data Ready for Auto-Fill!
+                        Pre-submission checks completed
                     </h1>
                     <p className="text-lg text-gray-600">
-                        Open the portal and our extension will handle the rest
+                        Your application data and supporting documents have been reviewed with basic, assistive checks.
                     </p>
                 </div>
 
@@ -54,7 +78,7 @@ export default function SuccessPage() {
                 {!showGuide ? (
                     <div className="card p-8">
                         <div className="text-5xl font-bold text-gradient mb-4">{count}</div>
-                        <p className="text-gray-600 mb-6">Preparing your autofill...</p>
+                        <p className="text-gray-600 mb-6">Summarising your validation results...</p>
                         <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
                             <motion.div 
                                 className="h-full bg-gradient-to-r from-indigo-600 to-purple-600" 
@@ -66,18 +90,57 @@ export default function SuccessPage() {
                 ) : (
                     <div className="card p-6 md:p-8 space-y-6">
                         <div className="flex items-center justify-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center">
-                                <Key size={20} className="text-amber-600" />
+                            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center">
+                                <ShieldCheck size={20} className="text-indigo-600" />
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900">Next Steps</h3>
+                            <h3 className="text-lg font-semibold text-gray-900">Summary & Next Steps</h3>
+                        </div>
+
+                        {docValidation && docValidation.overallRisk && (
+                            <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 text-left space-y-2">
+                                <div className="flex items-start gap-2">
+                                    <AlertTriangle size={18} className="text-amber-600 mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-900">
+                                            Pre-submission risk estimate
+                                        </p>
+                                        <p className="text-sm text-gray-700">
+                                            Level: <span className="font-medium uppercase">{docValidation.overallRisk.level}</span>{' '}
+                                            (score {docValidation.overallRisk.score}/100)
+                                        </p>
+                                        {docValidation.overallRisk.reasons?.length > 0 && (
+                                            <ul className="list-disc list-inside text-xs text-gray-700 mt-1 space-y-0.5">
+                                                {docValidation.overallRisk.reasons.map((reason, index) => (
+                                                    <li key={index}>{reason}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                </div>
+                                <p className="text-xs text-gray-600">
+                                    This estimate is based on basic file checks and simple matching logic. It is{' '}
+                                    <strong>not</strong> an official acceptance or rejection.
+                                </p>
+                            </div>
+                        )}
+
+                        <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 text-left text-sm text-blue-900 space-y-1.5">
+                            <p className="font-semibold">Academic and ethical scope</p>
+                            <p>
+                                Formitra assists you by checking for obvious issues in your data and documents. It does
+                                not bypass OTP, CAPTCHA, or any security controls, and it never submits forms on your behalf.
+                            </p>
+                            <p>
+                                Always verify your details and documents carefully on the official Passport Seva portal before final submission.
+                            </p>
                         </div>
 
                         <div className="space-y-3 text-left">
                             {[
-                                { icon: Rocket, text: 'Open the government portal', color: '#4f46e5' },
-                                { icon: Smartphone, text: 'Click the extension icon', color: '#7c3aed' },
-                                { icon: Sparkles, text: 'Click "Fill Application"', color: '#059669' },
-                                { icon: Key, text: 'Enter OTP when prompted', color: '#f59e0b' }
+                                { icon: Rocket, text: 'Open the official Passport Seva portal in your browser', color: '#4f46e5' },
+                                { icon: Smartphone, text: 'If you have the Formitra helper extension installed, open it on the portal page', color: '#7c3aed' },
+                                { icon: Sparkles, text: hasExtension ? 'Use the extension to assist with filling fields (no auto-submission)' : 'Manually enter details carefully, referring to this Formitra summary', color: '#059669' },
+                                { icon: Key, text: 'Enter OTP and complete all security steps directly on the official portal', color: '#f59e0b' }
                             ].map((step, i) => {
                                 const StepIcon = step.icon;
                                 return (
@@ -108,9 +171,19 @@ export default function SuccessPage() {
                                 className="btn-primary flex-1"
                             >
                                 <Rocket size={18} />
-                                Open Portal
+                                Open Official Portal
                                 <ExternalLink size={16} />
                             </a>
+                            {!hasExtension && (
+                                <button
+                                    type="button"
+                                    onClick={handleSimulateExtensionInstall}
+                                    className="btn-secondary flex-1"
+                                >
+                                    Simulate Extension Installed (demo)
+                                    <Smartphone size={18} />
+                                </button>
+                            )}
                             <button 
                                 onClick={handleComplete}
                                 className="btn-secondary flex-1"

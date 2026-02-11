@@ -57,13 +57,18 @@ export default function PassportFormPage() {
     };
 
     const handleNext = () => {
-        if (validateStep()) {
-            if (currentStep < PASSPORT_FORM_STEPS.length - 1) {
-                setSearchParams({ step: (currentStep + 1).toString() });
-            } else {
-                navigate(`/review/${serviceId}/${encodeURIComponent(decodedState)}`);
-            }
+        if (!validateStep()) return;
+
+        const isLastStep = currentStep >= PASSPORT_FORM_STEPS.length - 1;
+
+        if (!isLastStep) {
+            setSearchParams({ step: (currentStep + 1).toString() });
+            return;
         }
+
+        // When all applicant data steps are complete, move to the
+        // dedicated Document Upload step before final review.
+        navigate(`/upload/${serviceId}/${encodeURIComponent(decodedState)}`);
     };
 
     const handlePrev = () => {
