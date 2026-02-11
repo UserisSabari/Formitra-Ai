@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, MapPin, Edit3, Send, User, FileText, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, MapPin, Edit3, Send, User, FileText, AlertTriangle } from 'lucide-react';
+import ValidationSummaryPanel from '../components/ValidationSummaryPanel';
 
 const LOCAL_STORAGE_DOC_VALIDATION_KEY = 'formitra_document_validation';
 
@@ -151,24 +152,10 @@ export default function ReviewPage() {
                                             accept or reject your documents.
                                         </p>
                                     </div>
-                                    {docValidation.overallRisk && (
-                                        <div className="rounded-lg bg-white border border-gray-200 p-3 text-xs md:text-sm">
-                                            <p className="font-semibold text-gray-900 mb-1">
-                                                Rejection risk estimate
-                                            </p>
-                                            <p className="text-gray-700 mb-1">
-                                                Level: <span className="font-medium uppercase">{docValidation.overallRisk.level}</span>{' '}
-                                                (score {docValidation.overallRisk.score}/100)
-                                            </p>
-                                            {docValidation.overallRisk.reasons?.length > 0 && (
-                                                <ul className="list-disc list-inside text-gray-700 space-y-0.5 mt-1">
-                                                    {docValidation.overallRisk.reasons.map((reason, index) => (
-                                                        <li key={index}>{reason}</li>
-                                                    ))}
-                                                </ul>
-                                            )}
-                                        </div>
-                                    )}
+                                    <ValidationSummaryPanel
+                                        overallRisk={docValidation.overallRisk}
+                                        compact={false}
+                                    />
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs md:text-sm">
                                         {Object.entries(docValidation.perDocument || {}).map(([key, result]) => (

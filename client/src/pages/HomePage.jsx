@@ -129,7 +129,7 @@ export default function HomePage() {
                         {/* Stats */}
                         <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto pt-12">
                             {[
-                                { value: '2,500+', label: 'Users', icon: TrendingUp },
+                                { value: 'Free Forever', label: 'Users', icon: TrendingUp },
                                 { value: '85%', label: 'Time Saved', icon: Zap },
                                 { value: '99.9%', label: 'Accuracy', icon: CheckCircle2 }
                             ].map((stat, i) => (

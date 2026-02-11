@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, ExternalLink, ArrowRight, Smartphone, Key, Sparkles, Rocket, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, ExternalLink, ArrowRight, Smartphone, Key, Sparkles, Rocket, ShieldCheck } from 'lucide-react';
+import ValidationSummaryPanel from '../components/ValidationSummaryPanel';
 
 const LOCAL_STORAGE_DOC_VALIDATION_KEY = 'formitra_document_validation';
 
@@ -96,32 +97,11 @@ export default function SuccessPage() {
                             <h3 className="text-lg font-semibold text-gray-900">Summary & Next Steps</h3>
                         </div>
 
-                        {docValidation && docValidation.overallRisk && (
-                            <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 text-left space-y-2">
-                                <div className="flex items-start gap-2">
-                                    <AlertTriangle size={18} className="text-amber-600 mt-0.5" />
-                                    <div>
-                                        <p className="text-sm font-semibold text-gray-900">
-                                            Pre-submission risk estimate
-                                        </p>
-                                        <p className="text-sm text-gray-700">
-                                            Level: <span className="font-medium uppercase">{docValidation.overallRisk.level}</span>{' '}
-                                            (score {docValidation.overallRisk.score}/100)
-                                        </p>
-                                        {docValidation.overallRisk.reasons?.length > 0 && (
-                                            <ul className="list-disc list-inside text-xs text-gray-700 mt-1 space-y-0.5">
-                                                {docValidation.overallRisk.reasons.map((reason, index) => (
-                                                    <li key={index}>{reason}</li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                </div>
-                                <p className="text-xs text-gray-600">
-                                    This estimate is based on basic file checks and simple matching logic. It is{' '}
-                                    <strong>not</strong> an official acceptance or rejection.
-                                </p>
-                            </div>
+                        {docValidation && (
+                            <ValidationSummaryPanel
+                                overallRisk={docValidation.overallRisk}
+                                compact={false}
+                            />
                         )}
 
                         <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 text-left text-sm text-blue-900 space-y-1.5">

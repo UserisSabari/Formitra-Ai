@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, ArrowLeft, ArrowRight, AlertTriangle, FileText } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, ArrowRight, AlertTriangle } from 'lucide-react';
 import DocumentCard from '../components/documents/DocumentCard';
+import ValidationSummaryPanel from '../components/ValidationSummaryPanel';
 import { DOCUMENT_RULES } from '../config/documentRules';
 import { validateSingleDocument, computeRejectionRiskScore } from '../utils/documentValidation';
 
@@ -60,27 +61,30 @@ export default function DocumentUploadPage() {
         setIsValidating(true);
 
         try {
-            const perDocResults = {};
+            const applicantDataSubset = {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                dob: formData.dob,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                pincode: formData.pincode,
+            };
 
-            for (const key of Object.keys(DOCUMENT_RULES)) {
-                const file = documents[key]?.file || null;
-                // We only pass a subset of applicant data currently used in comparisons
-                const applicantDataSubset = {
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    dob: formData.dob,
-                    address: formData.address,
-                    city: formData.city,
-                    state: formData.state,
-                    pincode: formData.pincode,
-                };
+            const keys = Object.keys(DOCUMENT_RULES);
+            const results = await Promise.all(
+                keys.map((key) =>
+                    validateSingleDocument({
+                        key,
+                        file: documents[key]?.file || null,
+                        applicantData: applicantDataSubset,
+                    })
+                )
+            );
 
-                perDocResults[key] = await validateSingleDocument({
-                    key,
-                    file,
-                    applicantData: applicantDataSubset,
-                });
-            }
+            const perDocResults = Object.fromEntries(
+                keys.map((key, i) => [key, results[i]])
+            );
 
             const overallRisk = computeRejectionRiskScore(perDocResults);
 
@@ -126,24 +130,6 @@ export default function DocumentUploadPage() {
     };
 
     const currentRisk = validationResults?.overallRisk;
-
-    const riskLabel =
-        currentRisk?.level === 'high'
-            ? 'High rejection risk (review strongly recommended)'
-            : currentRisk?.level === 'medium'
-            ? 'Medium rejection risk (review suggested)'
-            : currentRisk?.level === 'low'
-            ? 'Low rejection risk (no guarantee of approval)'
-            : 'No risk estimate yet';
-
-    const riskColorClass =
-        currentRisk?.level === 'high'
-            ? 'bg-red-50 border-red-200 text-red-900'
-            : currentRisk?.level === 'medium'
-            ? 'bg-amber-50 border-amber-200 text-amber-900'
-            : currentRisk?.level === 'low'
-            ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-            : 'bg-gray-50 border-gray-200 text-gray-800';
 
     return (
         <div className="container py-12">
@@ -237,29 +223,7 @@ export default function DocumentUploadPage() {
                         />
                     </div>
 
-                    <div className={`mt-4 rounded-xl border p-4 md:p-5 ${riskColorClass}`}>
-                        <div className="flex items-start gap-3">
-                            <div className="mt-0.5">
-                                <FileText size={18} />
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-sm font-semibold mb-1">
-                                    Rejection risk estimate
-                                </p>
-                                <p className="text-xs md:text-sm mb-1">
-                                    {riskLabel}
-                                </p>
-                                {currentRisk && (
-                                    <p className="text-[11px] opacity-80">
-                                        Score: {currentRisk.score} / 100. This is a heuristic
-                                        score based on file format, image quality, and
-                                        basic consistency checks – it is <strong>not</strong>{' '}
-                                        an official decision.
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
+                    <ValidationSummaryPanel overallRisk={currentRisk} />
 
                     <div className="flex flex-col sm:flex-row gap-4 pt-2">
                         <button

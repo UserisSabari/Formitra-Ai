@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { UploadCloud, File as FileIcon, X } from 'lucide-react';
 
 /**
@@ -19,6 +19,19 @@ export default function FileDropzone({
 }) {
     const inputRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState(null);
+
+    const isImage = file?.type?.startsWith('image/');
+
+    useEffect(() => {
+        if (!file || !isImage) {
+            setPreviewUrl(null);
+            return;
+        }
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+        return () => URL.revokeObjectURL(url);
+    }, [file, isImage]);
 
     const handleClick = () => {
         if (disabled) return;
@@ -137,9 +150,17 @@ export default function FileDropzone({
 
                 {file && (
                     <div className="mt-4 flex items-center gap-3 rounded-lg bg-white/70 border border-gray-100 p-3">
-                        <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
-                            <FileIcon size={18} className="text-gray-500" />
-                        </div>
+                        {previewUrl ? (
+                            <img
+                                src={previewUrl}
+                                alt=""
+                                className="w-12 h-12 rounded-md object-cover border border-gray-200 flex-shrink-0"
+                            />
+                        ) : (
+                            <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                <FileIcon size={20} className="text-gray-500" />
+                            </div>
+                        )}
                         <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium text-gray-800 truncate">
                                 {file.name}

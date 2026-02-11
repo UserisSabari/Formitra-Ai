@@ -31,6 +31,10 @@ export const IMAGE_QUALITY_RULES = {
     MIN_CONTRAST: 25, // standard deviation of luminance
 };
 
+// Cap analysis dimensions to keep validation fast on large images.
+// Analysis is done on a downscaled version; results are still representative.
+export const MAX_IMAGE_DIMENSION_FOR_ANALYSIS = 400;
+
 // Fuzzy matching thresholds for comparing form data vs. mock OCR output.
 export const NAME_MATCH_THRESHOLD = 0.7; // 0..1
 export const ADDRESS_MATCH_THRESHOLD = 0.6;

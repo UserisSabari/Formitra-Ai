@@ -1,6 +1,7 @@
 import {
     DOCUMENT_RULES,
     IMAGE_QUALITY_RULES,
+    MAX_IMAGE_DIMENSION_FOR_ANALYSIS,
     NAME_MATCH_THRESHOLD,
     ADDRESS_MATCH_THRESHOLD,
     LOW_RISK_MAX,
@@ -12,6 +13,20 @@ import { mockOcrExtractFields } from './mockOcr';
 /**
  * Low-level file checks that do not depend on image parsing.
  */
+const EXT_TO_MIME = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    pdf: 'application/pdf',
+};
+
+function resolveMimeType(file) {
+    const reported = file.type?.toLowerCase();
+    if (reported && reported !== 'application/octet-stream') return reported;
+    const ext = (file.name || '').split('.').pop()?.toLowerCase();
+    return ext ? EXT_TO_MIME[ext] || reported : reported;
+}
+
 export function validateFileBasics(file, rules) {
     const issues = [];
 
@@ -20,7 +35,8 @@ export function validateFileBasics(file, rules) {
         return { issues, isValid: false };
     }
 
-    if (rules.allowedMimeTypes && !rules.allowedMimeTypes.includes(file.type)) {
+    const mime = resolveMimeType(file);
+    if (rules.allowedMimeTypes && mime && !rules.allowedMimeTypes.includes(mime)) {
         issues.push('File type not allowed for this document.');
     }
 
@@ -34,8 +50,11 @@ export function validateFileBasics(file, rules) {
 /**
  * Draws the image onto an in-memory canvas and computes:
  *  - approximate blur score (edge variance)
-+ *  - brightness (mean luminance)
+ *  - brightness (mean luminance)
  *  - contrast (standard deviation of luminance)
+ *
+ * Large images are downscaled before analysis to keep validation fast
+ * while preserving relative quality metrics.
  */
 async function getImageMetrics(file) {
     const imageUrl = URL.createObjectURL(file);
@@ -54,11 +73,19 @@ async function getImageMetrics(file) {
             throw new Error('Canvas context not available');
         }
 
-        canvas.width = img.width;
-        canvas.height = img.height;
-        context.drawImage(img, 0, 0);
+        let width = img.width;
+        let height = img.height;
+        const maxDim = MAX_IMAGE_DIMENSION_FOR_ANALYSIS;
+        if (width > maxDim || height > maxDim) {
+            const scale = Math.min(maxDim / width, maxDim / height);
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+        }
 
-        const { width, height } = canvas;
+        canvas.width = width;
+        canvas.height = height;
+        context.drawImage(img, 0, 0, width, height);
+
         const imageData = context.getImageData(0, 0, width, height);
         const { data } = imageData;
 
@@ -80,8 +107,9 @@ async function getImageMetrics(file) {
             luminances.length;
         const contrast = Math.sqrt(variance);
 
-        // Approximate blur: compute gradient magnitude variance on a coarse grid
-        const step = 4;
+        // Approximate blur: compute gradient magnitude variance on a coarse grid.
+        // Coarser step for larger images to keep iteration count bounded.
+        const step = Math.max(4, Math.floor(Math.min(width, height) / 100));
         let edgeValues = [];
         for (let y = 0; y < height - step; y += step) {
             for (let x = 0; x < width - step; x += step) {
@@ -188,6 +216,16 @@ export function detectFacePresenceMock() {
     };
 }
 
+function normalizeDobForCompare(str) {
+    if (!str || str.length < 8) return null;
+    const s = str.trim().slice(0, 10);
+    const m1 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m1) return `${m1[1]}-${m1[2]}-${m1[3]}`;
+    const m2 = s.match(/^(\d{2})[-/](\d{2})[-/](\d{4})/);
+    if (m2) return `${m2[3]}-${m2[2]}-${m2[1]}`;
+    return s;
+}
+
 /**
  * Compare applicant form data with mock OCR output for basic
  * consistency checks.
@@ -222,9 +260,9 @@ function compareWithApplicantData(applicantData, docType, ocrData) {
         }
 
         if (ocrData.dateOfBirthText && applicantData.dob) {
-            const formDobNorm = String(applicantData.dob).slice(0, 10);
-            const ocrDobNorm = String(ocrData.dateOfBirthText).slice(0, 10);
-            if (formDobNorm !== ocrDobNorm) {
+            const formDobNorm = normalizeDobForCompare(String(applicantData.dob));
+            const ocrDobNorm = normalizeDobForCompare(String(ocrData.dateOfBirthText));
+            if (formDobNorm && ocrDobNorm && formDobNorm !== ocrDobNorm) {
                 issues.push(
                     'Date of birth on document appears different from the date entered in the form.'
                 );
@@ -261,51 +299,45 @@ function compareWithApplicantData(applicantData, docType, ocrData) {
 }
 
 /**
- * Compute a simple risk score from the accumulated issues across all
- * documents. Each issue type contributes a weighted penalty.
+ * Compute a risk score from accumulated issues. Each issue type adds a
+ * weighted penalty. Per-document contribution is capped to avoid one
+ * document dominating the score.
  */
+const PER_DOC_CAP = 50; // max points from any single document
+
 export function computeRejectionRiskScore(perDocResults) {
     let score = 0;
     const reasons = [];
 
-    const addPenalty = (amount, reason) => {
-        score += amount;
-        reasons.push(reason);
-    };
-
     Object.entries(perDocResults).forEach(([key, result]) => {
         if (!result) return;
+        if (result.status === 'optional-missing') return; // optional docs don't penalise
+
+        let docScore = 0;
 
         if (result.status === 'missing') {
-            addPenalty(
-                40,
-                `${result.label || key} is missing but expected by the application.`
-            );
+            docScore += 35;
+            reasons.push(`${result.label || key} is missing but expected by the application.`);
         }
 
         if (result.basicIssues?.length) {
-            addPenalty(
-                20,
-                `${result.label || key} has file-level issues (format/size).`
-            );
+            docScore += 20;
+            reasons.push(`${result.label || key} has file-level issues (format/size).`);
         }
 
         if (result.qualityIssues?.length) {
-            addPenalty(
-                15,
-                `${result.label || key} has potential image quality concerns.`
-            );
+            docScore += 15;
+            reasons.push(`${result.label || key} has potential image quality concerns.`);
         }
 
         if (result.consistencyIssues?.length) {
-            addPenalty(
-                25,
-                `${result.label || key} appears inconsistent with the form details.`
-            );
+            docScore += 20;
+            reasons.push(`${result.label || key} appears inconsistent with the form details.`);
         }
+
+        score += Math.min(docScore, PER_DOC_CAP);
     });
 
-    // Clamp score into [0, 100]
     score = Math.max(0, Math.min(100, score));
 
     let level = 'low';
@@ -356,6 +388,21 @@ export async function validateSingleDocument({
     const basic = validateFileBasics(file, rules);
     const basicIssues = basic.issues;
 
+    // Early exit: skip expensive checks if file fails basic validation
+    if (!basic.isValid) {
+        return {
+            key,
+            label,
+            status: 'invalid',
+            basicIssues,
+            qualityIssues: [],
+            consistencyIssues: [],
+            metrics: null,
+            faceInfo: null,
+            similarityDetails: {},
+        };
+    }
+
     let qualityIssues = [];
     let metrics = null;
     let faceInfo = null;
@@ -369,11 +416,13 @@ export async function validateSingleDocument({
     }
 
     const ocrData = mockOcrExtractFields(file, key);
-    const consistency = compareWithApplicantData(
-        applicantData,
-        key,
-        ocrData
-    );
+    // Skip consistency check when OCR returns no usable data (e.g. generic filenames)
+    const hasUsefulOcr = (ocrData.fullNameText && ocrData.fullNameText.length > 2) ||
+        (ocrData.addressText && ocrData.addressText.length > 5);
+
+    const consistency = hasUsefulOcr
+        ? compareWithApplicantData(applicantData, key, ocrData)
+        : { issues: [], details: {} };
 
     const consistencyIssues = consistency.issues;
 
