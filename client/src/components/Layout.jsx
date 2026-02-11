@@ -115,7 +115,7 @@ export default function Layout() {
                             <ul className="space-y-2 text-sm text-gray-600">
                                 <li>Auto-Fill Forms</li>
                                 <li>One-Click Submit</li>
-                                <li>36 States Supported</li>
+                                <li>28 States Supported</li>
                                 <li>Secure & Private</li>
                             </ul>
                         </div>
