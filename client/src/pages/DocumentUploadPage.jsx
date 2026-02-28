@@ -147,14 +147,14 @@ export default function DocumentUploadPage() {
                             <ArrowLeft size={16} />
                             Back to Application Form
                         </button>
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
                             Upload Supporting Documents
+                            <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wide border border-indigo-200">
+                                Powered by AI OCR
+                            </span>
                         </h1>
                         <p className="text-gray-600 max-w-2xl text-sm md:text-base">
-                            Upload your passport photograph and address proof so that
-                            Formitra can run basic pre-submission checks. This assists
-                            you in catching obvious issues before you visit the official
-                            portal.
+                            Upload your passport photograph and address proof. Our AI backend will extract text using OCR and verify it against your application data.
                         </p>
                     </div>
                     <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 border border-indigo-200">
@@ -222,6 +222,23 @@ export default function DocumentUploadPage() {
                             issues={documents.identityProof.issues}
                         />
                     </div>
+
+                    {validationResults && validationResults.perDocument && Object.entries(validationResults.perDocument).map(([key, result]) => {
+                        if (result.extractedTextSnippet && result.extractedTextSnippet.trim().length > 0) {
+                            return (
+                                <div key={`ocr-${key}`} className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mt-4">
+                                    <h4 className="text-sm font-semibold text-indigo-900 flex items-center gap-2 mb-2">
+                                        <ShieldCheck size={16} />
+                                        OCR Extraction: {DOCUMENT_RULES[key]?.label || key}
+                                    </h4>
+                                    <p className="text-xs text-indigo-800 font-mono bg-white p-3 rounded border border-indigo-100 whitespace-pre-wrap break-words">
+                                        "{result.extractedTextSnippet.trim()}"
+                                    </p>
+                                </div>
+                            );
+                        }
+                        return null;
+                    })}
 
                     <ValidationSummaryPanel overallRisk={currentRisk} />
 

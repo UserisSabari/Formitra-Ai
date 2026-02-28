@@ -47,11 +47,28 @@ export default function PassportFormPage() {
 
     const validateStep = () => {
         const newErrors = {};
-        PASSPORT_FORM_STEPS[currentStep].fields.forEach(field => {
-            if (field.required && !formData[field.name]) {
+        const stepFields = PASSPORT_FORM_STEPS[currentStep].fields;
+
+        stepFields.forEach(field => {
+            const value = formData[field.name];
+
+            // Required field check
+            if (field.required && !value) {
                 newErrors[field.name] = 'This field is required';
+            } else if (value) {
+                // Specific validation rules
+                if (field.name === 'email' && !/\S+@\S+\.\S+/.test(value)) {
+                    newErrors[field.name] = 'Please enter a valid email address';
+                }
+                if (field.name === 'mobile' && !/^\d{10}$/.test(value)) {
+                    newErrors[field.name] = 'Mobile number must be 10 digits';
+                }
+                if (field.name === 'pincode' && !/^\d{6}$/.test(value)) {
+                    newErrors[field.name] = 'PIN code must be 6 digits';
+                }
             }
         });
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -84,9 +101,9 @@ export default function PassportFormPage() {
 
     return (
         <div className="container py-12">
-            <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 className="max-w-4xl mx-auto"
             >
                 {/* Header */}
@@ -98,7 +115,7 @@ export default function PassportFormPage() {
                         <ArrowLeft size={16} />
                         {currentStep === 0 ? 'Back to State Selection' : 'Previous Step'}
                     </button>
-                    
+
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                         <div>
                             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{step.title}</h1>
@@ -115,13 +132,12 @@ export default function PassportFormPage() {
                                 const isCurrent = i === currentStep;
                                 return (
                                     <div key={s.id} className="flex items-center">
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
-                                            isCompleted 
-                                                ? 'bg-indigo-600 text-white' 
-                                                : isCurrent 
-                                                    ? 'bg-indigo-50 border-2 border-indigo-600 text-indigo-600' 
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${isCompleted
+                                                ? 'bg-indigo-600 text-white'
+                                                : isCurrent
+                                                    ? 'bg-indigo-50 border-2 border-indigo-600 text-indigo-600'
                                                     : 'bg-gray-100 text-gray-400'
-                                        }`}>
+                                            }`}>
                                             {isCompleted ? (
                                                 <Check size={18} />
                                             ) : (
@@ -129,9 +145,8 @@ export default function PassportFormPage() {
                                             )}
                                         </div>
                                         {i < PASSPORT_FORM_STEPS.length - 1 && (
-                                            <div className={`w-6 h-0.5 mx-1 ${
-                                                isCompleted ? 'bg-indigo-600' : 'bg-gray-200'
-                                            }`} />
+                                            <div className={`w-6 h-0.5 mx-1 ${isCompleted ? 'bg-indigo-600' : 'bg-gray-200'
+                                                }`} />
                                         )}
                                     </div>
                                 );

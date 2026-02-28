@@ -354,91 +354,76 @@ export function computeRejectionRiskScore(perDocResults) {
  * High-level orchestration function that runs all the checks for a
  * single document and returns a serialisable summary.
  */
-export async function validateSingleDocument({
-    key,
-    file,
-    applicantData,
-}) {
-    const rules = DOCUMENT_RULES[key];
-    if (!rules) {
-        return {
-            key,
-            label: key,
-            status: 'missing',
-            basicIssues: [],
-            qualityIssues: [],
-            consistencyIssues: [],
-        };
-    }
-
-    const label = rules.label || key;
-
+export async function validateSingleDocument({ key, file, applicantData }) {
     if (!file) {
-        const isRequired = rules.required;
         return {
-            key,
-            label,
-            status: isRequired ? 'missing' : 'optional-missing',
-            basicIssues: [],
+            status: 'missing',
+            basicIssues: ['Document is missing.'],
             qualityIssues: [],
             consistencyIssues: [],
         };
     }
 
-    const basic = validateFileBasics(file, rules);
-    const basicIssues = basic.issues;
+    // 1. Client-side basic validation (Size/Type)
+    const rule = DOCUMENT_RULES[key];
+    const basicIssues = [];
 
-    // Early exit: skip expensive checks if file fails basic validation
-    if (!basic.isValid) {
+    if (rule) {
+        if (file.size > rule.maxSizeMB * 1024 * 1024) {
+            basicIssues.push(`File exceeds maximum size of ${rule.maxSizeMB}MB.`);
+        }
+        if (!rule.acceptedTypes.includes(file.type)) {
+            basicIssues.push(`Invalid file format. Accepted: ${rule.acceptedTypes.join(', ')}`);
+        }
+    }
+
+    if (basicIssues.length > 0) {
         return {
-            key,
-            label,
-            status: 'invalid',
+            status: 'rejected',
             basicIssues,
             qualityIssues: [],
-            consistencyIssues: [],
-            metrics: null,
-            faceInfo: null,
-            similarityDetails: {},
+            consistencyIssues: []
         };
     }
 
-    let qualityIssues = [];
-    let metrics = null;
-    let faceInfo = null;
+    // 2. Call the Backend API for OCR and deeper verification
+    try {
+        const formData = new FormData();
+        formData.append('document', file);
+        formData.append('documentType', key);
+        formData.append('applicantData', JSON.stringify(applicantData));
 
-    const isImage = file.type.startsWith('image/');
-    if (isImage && key === 'passportPhoto') {
-        const quality = await validateImageDimensionsAndQuality(file, rules);
-        metrics = quality.metrics;
-        qualityIssues = quality.issues;
-        faceInfo = detectFacePresenceMock();
+        const response = await fetch('http://localhost:5000/api/verify-document', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Backend error: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        // Map backend result to frontend structure
+        const allIssues = result.issues || [];
+        return {
+            status: result.status.toLowerCase(), // 'valid', 'warning', 'high risk' -> 'rejected'
+            basicIssues: result.score < 50 ? ['High risk score detected by backend.'] : [],
+            qualityIssues: [],
+            consistencyIssues: allIssues, // Put backend issues in consistency for now to display them
+            backendScore: result.score,
+            extractedTextSnippet: result.extractedTextSnippet
+        };
+
+    } catch (error) {
+        console.error("Backend verification failed:", error);
+        // Fallback if backend is down
+        return {
+            status: 'warning',
+            basicIssues: [],
+            qualityIssues: [],
+            consistencyIssues: ['Backend verification unavailable. Proceeding with caution.']
+        };
     }
-
-    const ocrData = mockOcrExtractFields(file, key);
-    // Skip consistency check when OCR returns no usable data (e.g. generic filenames)
-    const hasUsefulOcr = (ocrData.fullNameText && ocrData.fullNameText.length > 2) ||
-        (ocrData.addressText && ocrData.addressText.length > 5);
-
-    const consistency = hasUsefulOcr
-        ? compareWithApplicantData(applicantData, key, ocrData)
-        : { issues: [], details: {} };
-
-    const consistencyIssues = consistency.issues;
-
-    const hasAnyIssue =
-        basicIssues.length || qualityIssues.length || consistencyIssues.length;
-
-    return {
-        key,
-        label,
-        status: hasAnyIssue ? 'invalid' : 'valid',
-        basicIssues,
-        qualityIssues,
-        consistencyIssues,
-        metrics,
-        faceInfo,
-        similarityDetails: consistency.details,
-    };
 }
 
