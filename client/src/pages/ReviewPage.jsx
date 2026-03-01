@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, MapPin, Edit3, Send, User, FileText, AlertTriangle } from 'lucide-react';
-import ValidationSummaryPanel from '../components/ValidationSummaryPanel';
+import { CheckCircle2, MapPin, Edit3, Send, User, FileText, AlertCircle, ShieldCheck, CheckCircle } from 'lucide-react';
 
 const LOCAL_STORAGE_DOC_VALIDATION_KEY = 'formitra_document_validation';
 
@@ -16,13 +15,13 @@ export default function ReviewPage() {
     useEffect(() => {
         const savedForm = localStorage.getItem('formitra_form_data');
         if (savedForm) {
-            try { 
-                setFormData(JSON.parse(savedForm)); 
-            } catch { 
-                navigate('/'); 
+            try {
+                setFormData(JSON.parse(savedForm));
+            } catch {
+                navigate('/');
             }
-        } else { 
-            navigate('/'); 
+        } else {
+            navigate('/');
         }
 
         const savedValidation = localStorage.getItem(LOCAL_STORAGE_DOC_VALIDATION_KEY);
@@ -54,7 +53,7 @@ export default function ReviewPage() {
                 }
             }, '*');
         }
-        
+
         // Store in localStorage as backup
         localStorage.setItem('formitra_app_data', JSON.stringify({
             service: serviceId,
@@ -84,11 +83,10 @@ export default function ReviewPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {fields.map((key) => (
-                    <div 
-                        key={key} 
-                        className={`p-4 rounded-lg bg-gray-50 border border-gray-200 ${
-                            key === 'address' || key === 'email' ? 'md:col-span-2 lg:col-span-3' : ''
-                        }`}
+                    <div
+                        key={key}
+                        className={`p-4 rounded-lg bg-gray-50 border border-gray-200 ${key === 'address' || key === 'email' ? 'md:col-span-2 lg:col-span-3' : ''
+                            }`}
                     >
                         <p className="text-xs text-gray-500 mb-1.5 font-medium">{formatLabel(key)}</p>
                         <p className="text-gray-900 font-medium text-sm break-words">
@@ -102,9 +100,9 @@ export default function ReviewPage() {
 
     return (
         <div className="container py-12">
-            <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 className="max-w-5xl mx-auto space-y-8"
             >
                 {/* Header */}
@@ -138,57 +136,79 @@ export default function ReviewPage() {
                             <div className="divider"></div>
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                                    <FileText size={16} />
-                                    Document Validation Summary
+                                    <ShieldCheck size={16} />
+                                    AI Document Verification Summary
                                 </div>
 
-                                <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 space-y-3">
-                                    <div className="flex items-start gap-2">
-                                        <AlertTriangle size={18} className="text-amber-600 mt-0.5" />
-                                        <p className="text-xs md:text-sm text-gray-800">
-                                            <strong>This is a pre-submission validation, not official verification.</strong>{' '}
-                                            These checks highlight potential issues based on file properties and
-                                            simple matching logic. Only the official passport authorities can
-                                            accept or reject your documents.
-                                        </p>
-                                    </div>
-                                    <ValidationSummaryPanel
-                                        overallRisk={docValidation.overallRisk}
-                                        compact={false}
-                                    />
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs md:text-sm">
-                                        {Object.entries(docValidation.perDocument || {}).map(([key, result]) => (
-                                            <div
-                                                key={key}
-                                                className="rounded-lg bg-white border border-gray-200 p-3 space-y-1"
-                                            >
-                                                <p className="font-semibold text-gray-900">
-                                                    {result.label || key}
-                                                </p>
-                                                <p className="text-gray-700">
-                                                    Status:{' '}
-                                                    <span className="font-medium">
-                                                        {result.status}
+                                {/* Global Package Health Card from Gemini */}
+                                <div className={`p-5 rounded-xl border ${docValidation.packageStatus === 'Valid' ? 'bg-emerald-50 border-emerald-200' : docValidation.packageStatus === 'Error' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                                        <div className="flex items-start gap-3">
+                                            {docValidation.packageStatus === 'Valid' ? (
+                                                <CheckCircle className="text-emerald-500 mt-0.5 flex-shrink-0" size={24} />
+                                            ) : docValidation.packageStatus === 'Error' ? (
+                                                <AlertCircle className="text-red-500 mt-0.5 flex-shrink-0" size={24} />
+                                            ) : (
+                                                <AlertCircle className="text-amber-500 mt-0.5 flex-shrink-0" size={24} />
+                                            )}
+                                            <div>
+                                                <h3 className="font-bold text-gray-900 text-lg">Application Package Health</h3>
+                                                <div className="mt-1 flex items-center gap-2">
+                                                    <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full ${docValidation.packageStatus === 'Valid' ? 'bg-emerald-100 text-emerald-800' : docValidation.packageStatus === 'Error' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}`}>
+                                                        {docValidation.packageStatus.toUpperCase()}
                                                     </span>
-                                                </p>
-                                                {[...(result.basicIssues || []), ...(result.qualityIssues || []), ...(result.consistencyIssues || [])].length > 0 ? (
-                                                    <ul className="list-disc list-inside text-gray-700 space-y-0.5">
-                                                        {[...(result.basicIssues || []), ...(result.qualityIssues || []), ...(result.consistencyIssues || [])].map(
-                                                            (issue, index) => (
-                                                                <li key={index}>{issue}</li>
-                                                            )
-                                                        )}
+                                                    {docValidation.overallScore !== undefined && (
+                                                        <span className="text-xs font-bold text-gray-600 bg-white/60 px-2 py-0.5 rounded border border-gray-200">
+                                                            Score: {docValidation.overallScore}/100
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white/70 p-4 rounded-lg border border-white/60 shadow-sm mt-3">
+                                        <p className="flex items-center gap-2 text-xs font-bold text-indigo-900 mb-2 uppercase tracking-wider">
+                                            <ShieldCheck size={14} /> Collective AI Analysis
+                                        </p>
+                                        <p className="text-sm text-gray-800 leading-relaxed font-medium">"{docValidation.collectiveInsights}"</p>
+                                    </div>
+                                </div>
+
+                                {/* Document Breakdown */}
+                                {docValidation.documentBreakdown && docValidation.documentBreakdown.length > 0 && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                                        {docValidation.documentBreakdown.map((doc, idx) => (
+                                            <div key={idx} className={`p-4 rounded-lg border bg-white ${doc.status === 'Valid' ? 'border-emerald-200 shadow-sm' : doc.status === 'Error' ? 'border-red-300 shadow-sm' : 'border-amber-200 shadow-sm'}`}>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    {doc.status === 'Valid' ? (
+                                                        <CheckCircle className="text-emerald-500 flex-shrink-0" size={16} />
+                                                    ) : doc.status === 'Error' ? (
+                                                        <AlertCircle className="text-red-500 flex-shrink-0" size={16} />
+                                                    ) : (
+                                                        <AlertCircle className="text-amber-500 flex-shrink-0" size={16} />
+                                                    )}
+                                                    <div>
+                                                        <p className="font-bold text-gray-900 text-sm truncate">{doc.originalFileName || `Document ${idx + 1}`}</p>
+                                                        <p className="text-[10px] font-bold text-gray-500 uppercase">{doc.inferredDocumentType}</p>
+                                                    </div>
+                                                </div>
+
+                                                {doc.issues && doc.issues.length > 0 ? (
+                                                    <ul className={`mt-2 list-disc list-inside text-xs space-y-0.5 ${doc.status === 'Error' ? 'text-red-700' : 'text-amber-700'}`}>
+                                                        {doc.issues.map((issue, i) => (
+                                                            <li key={i}>{issue}</li>
+                                                        ))}
                                                     </ul>
                                                 ) : (
-                                                    <p className="text-gray-500">
-                                                        No major issues detected in the basic checks.
+                                                    <p className="mt-2 text-xs text-emerald-700 font-medium flex items-center gap-1">
+                                                        <CheckCircle2 size={12} /> Document looks perfect.
                                                     </p>
                                                 )}
                                             </div>
                                         ))}
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </>
                     )}
@@ -196,15 +216,15 @@ export default function ReviewPage() {
 
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-4">
-                    <button 
-                        onClick={handleBack} 
+                    <button
+                        onClick={handleBack}
                         className="btn-secondary flex-1 sm:flex-none sm:w-40"
                     >
                         <Edit3 size={18} />
                         Edit
                     </button>
-                    <button 
-                        onClick={handleSubmit} 
+                    <button
+                        onClick={handleSubmit}
                         className="btn-success flex-1"
                     >
                         <Send size={18} />

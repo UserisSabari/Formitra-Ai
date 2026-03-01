@@ -96,7 +96,7 @@ export default function DocumentUploadPage() {
         try {
             const formParams = new FormData();
             formParams.append('applicantData', JSON.stringify(applicantDataSubset));
-            
+
             // Append all files to the 'documents' array expected by multer
             selectedFiles.forEach(file => {
                 formParams.append('documents', file);
@@ -129,6 +129,11 @@ export default function DocumentUploadPage() {
     };
 
     const handleContinueToReview = () => {
+        if (aiPackageResult) {
+            localStorage.setItem('formitra_document_validation', JSON.stringify(aiPackageResult));
+        } else {
+            localStorage.removeItem('formitra_document_validation');
+        }
         navigate(`/review/${serviceId}/${encodeURIComponent(decodedState)}`);
     };
 
@@ -254,10 +259,10 @@ export default function DocumentUploadPage() {
 
                 {aiPackageResult && !isVerifying && (
                     <div className="space-y-6 pt-4">
-                        
+
                         {/* Global Package Health Card */}
                         <div className={`p-6 rounded-xl border-2 shadow-sm ${aiPackageResult.packageStatus === 'Valid' ? 'bg-emerald-50 border-emerald-400' : aiPackageResult.packageStatus === 'Error' ? 'bg-red-50 border-red-400' : 'bg-amber-50 border-amber-400'}`}>
-                             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
                                 <div className="flex items-start gap-4">
                                     {aiPackageResult.packageStatus === 'Valid' ? (
                                         <CheckCircle className="text-emerald-500 mt-1 flex-shrink-0" size={32} />
@@ -280,14 +285,14 @@ export default function DocumentUploadPage() {
                                         </div>
                                     </div>
                                 </div>
-                             </div>
+                            </div>
 
-                             <div className="bg-white/80 p-5 rounded-lg border border-white/60 shadow-sm mt-4">
+                            <div className="bg-white/80 p-5 rounded-lg border border-white/60 shadow-sm mt-4">
                                 <p className="flex items-center gap-2 text-sm font-bold text-indigo-900 mb-2 uppercase tracking-wider">
                                     <ShieldCheck size={16} /> Collective AI Analysis
                                 </p>
                                 <p className="text-base text-gray-800 leading-relaxed font-medium">"{aiPackageResult.collectiveInsights}"</p>
-                             </div>
+                            </div>
                         </div>
 
                         {/* Individual Document Breakdown */}
