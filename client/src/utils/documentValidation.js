@@ -369,11 +369,11 @@ export async function validateSingleDocument({ key, file, applicantData }) {
     const basicIssues = [];
 
     if (rule) {
-        if (file.size > rule.maxSizeMB * 1024 * 1024) {
-            basicIssues.push(`File exceeds maximum size of ${rule.maxSizeMB}MB.`);
+        if (rule.maxSizeBytes && file.size > rule.maxSizeBytes) {
+            basicIssues.push(`File exceeds maximum size allowed.`);
         }
-        if (!rule.acceptedTypes.includes(file.type)) {
-            basicIssues.push(`Invalid file format. Accepted: ${rule.acceptedTypes.join(', ')}`);
+        if (rule.allowedMimeTypes && !rule.allowedMimeTypes.includes(file.type)) {
+            basicIssues.push(`Invalid file format. Accepted: ${rule.allowedMimeTypes.join(', ')}`);
         }
     }
 
