@@ -10,11 +10,15 @@ import ReviewPage from './pages/ReviewPage';
 import SuccessPage from './pages/SuccessPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import DocumentUploadPage from './pages/DocumentUploadPage';
+import MockPortalPage from './pages/MockPortalPage';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        {/* Standalone mock portal (no Formitra layout shell) */}
+        <Route path="/mock-portal" element={<MockPortalPage />} />
+
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/select-state/:serviceId" element={<SelectStatePage />} />

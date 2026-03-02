@@ -61,6 +61,8 @@ export default function ReviewPage() {
             data: formData
         }));
 
+        // After saving, move to the Success page which guides
+        // the user through next steps (including extension setup).
         navigate('/success');
     };
 
@@ -246,6 +248,7 @@ export default function ReviewPage() {
                         </div>
                     </div>
                 </div>
+
             </motion.div>
         </div>
     );
