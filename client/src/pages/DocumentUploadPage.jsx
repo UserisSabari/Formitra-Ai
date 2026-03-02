@@ -102,7 +102,7 @@ export default function DocumentUploadPage() {
                 formParams.append('documents', file);
             });
 
-            const response = await fetch('http://localhost:5000/api/verify-document', {
+            const response = await fetch('https://formitra-ai.onrender.com/api/verify-document', {
                 method: 'POST',
                 body: formParams,
             });
