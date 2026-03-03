@@ -146,7 +146,7 @@ export default function SuccessPage() {
 
                         <div className="space-y-3 text-left">
                             {[
-                                { icon: Rocket, text: 'Open the official Passport Seva portal in your browser', color: '#4f46e5' },
+                                { icon: Rocket, text: 'Open the mock Passport Seva portal in your browser (demo only)', color: '#4f46e5' },
                                 { icon: Smartphone, text: 'If you have the Formitra helper extension installed, open it on the portal page', color: '#7c3aed' },
                                 { icon: Sparkles, text: hasExtension ? 'Use the extension to assist with filling fields (no auto-submission)' : 'Manually enter details carefully, referring to this Formitra summary', color: '#059669' },
                                 { icon: Key, text: 'Enter OTP and complete all security steps directly on the official portal', color: '#f59e0b' }
@@ -173,16 +173,15 @@ export default function SuccessPage() {
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                            <a 
-                                href="https://www.passportindia.gov.in/" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
+                            <button
+                                type="button"
+                                onClick={() => navigate('/mock-portal')}
                                 className="btn-primary flex-1"
                             >
                                 <Rocket size={18} />
-                                Open Official Portal
+                                Open Mock Portal
                                 <ExternalLink size={16} />
-                            </a>
+                            </button>
                             {!hasExtension && (
                                 <button
                                     type="button"
