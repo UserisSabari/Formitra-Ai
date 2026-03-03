@@ -5,9 +5,9 @@ AI-powered form automation for Indian government services. Complete any governme
 ## 🚀 Features
 
 - **Auto-Fill Forms** - Intelligent field detection and auto-fill
-- **One-Click Submit** - Automatic form submission
+- **Assisted Submission** - Helps you fill faster; you review and submit manually
 - **36 States Supported** - All Indian states and union territories
-- **Secure & Private** - Data stored locally, no external API calls
+- **Secure & Private by default** - Application data is stored locally in your browser; if you run AI document verification, your uploaded documents are sent to the Formitra backend which calls Gemini for analysis
 - **Multiple Services** - Passport, Income Certificate, Domicile, Driving License, Ration Card, Birth Certificate
 
 ## 📁 Project Structure
@@ -17,7 +17,6 @@ Formitra-Ai/
 ├── client/          # React web application
 ├── extension/       # Chrome extension for auto-fill
 ├── server/          # Express API server
-└── docs/           # Documentation files
 ```
 
 ## 🛠️ Setup
@@ -47,12 +46,23 @@ npm install
 npm start
 ```
 
+Create `server/.env`:
+
+```bash
+GEMINI_API_KEY=your_key_here
+```
+
+### Configure AI backend URL (Client)
+
+By default, the client calls the deployed backend. To point the client at a different backend, set:
+
+```bash
+VITE_AI_API_BASE_URL=http://localhost:5000
+```
+
 ## 📚 Documentation
 
-- [START_HERE.md](START_HERE.md) - Quick start guide
-- [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md) - Complete documentation index
-- [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) - Setup and testing guide
-- [PROJECT_COMPLETION_REPORT.md](PROJECT_COMPLETION_REPORT.md) - Project overview
+Documentation files are being consolidated (coming soon).
 
 ## ☁️ Deploy to Vercel
 

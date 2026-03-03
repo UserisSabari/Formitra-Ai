@@ -6,6 +6,35 @@ import ValidationSummaryPanel from '../components/ValidationSummaryPanel';
 
 const LOCAL_STORAGE_DOC_VALIDATION_KEY = 'formitra_document_validation';
 
+function deriveOverallRiskFromGemini(docValidation) {
+    if (!docValidation) return null;
+
+    const packageStatus = String(docValidation.packageStatus || '').toLowerCase();
+    const breakdown = Array.isArray(docValidation.documentBreakdown) ? docValidation.documentBreakdown : [];
+
+    const errorDocs = breakdown.filter(d => d?.status === 'Error').length;
+    const warningDocs = breakdown.filter(d => d?.status === 'Warning').length;
+    const issueCount = breakdown.reduce((acc, d) => acc + (Array.isArray(d?.issues) ? d.issues.length : 0), 0);
+
+    let level = 'low';
+    if (packageStatus.includes('high')) level = 'high';
+    else if (packageStatus.includes('warning')) level = 'medium';
+    else if (packageStatus.includes('valid')) level = 'low';
+    else if (errorDocs > 0) level = 'high';
+    else if (warningDocs > 0 || issueCount > 0) level = 'medium';
+
+    let score = level === 'high' ? 80 : level === 'medium' ? 50 : 20;
+    score = Math.min(100, score + Math.min(20, errorDocs * 10 + warningDocs * 5 + issueCount * 2));
+
+    const reasons = [];
+    if (docValidation.collectiveInsights) reasons.push(docValidation.collectiveInsights);
+    if (errorDocs > 0) reasons.push(`${errorDocs} document(s) flagged as Error`);
+    if (warningDocs > 0) reasons.push(`${warningDocs} document(s) flagged as Warning`);
+    if (issueCount > 0) reasons.push(`${issueCount} total issue(s) detected across documents`);
+
+    return { score, level, reasons: reasons.slice(0, 4) };
+}
+
 export default function SuccessPage() {
     const navigate = useNavigate();
     const [count, setCount] = useState(3);
@@ -99,7 +128,7 @@ export default function SuccessPage() {
 
                         {docValidation && (
                             <ValidationSummaryPanel
-                                overallRisk={docValidation.overallRisk}
+                                overallRisk={deriveOverallRiskFromGemini(docValidation)}
                                 compact={false}
                             />
                         )}

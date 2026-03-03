@@ -1,4 +1,4 @@
-// content.js - Intelligent form filler with auto-submit capability
+// content.js - Intelligent form filler (no auto-submit)
 // This script runs on government portals (e.g., passportindia.gov.in, mock portals)
 
 console.log("Formitra AI Assistant: Loaded on portal.");
@@ -91,9 +91,8 @@ function fillFormIntelligently(data, service) {
 
     console.log(`Formitra AI: Filled ${filledCount}/${totalCount} fields`);
 
-    // Auto-submit if enabled (with delay to ensure all fields are filled)
     setTimeout(() => {
-        autoSubmitForm();
+        showNextStepsModal();
     }, 1500);
 }
 
@@ -204,73 +203,9 @@ function formatDateForInput(dateStr) {
 }
 
 /**
- * Auto-submit the form if submit button is found
+ * Show next-steps modal.
  */
-function autoSubmitForm() {
-    console.log("Formitra AI: Looking for submit button...");
-
-    // Common submit button selectors
-    const submitSelectors = [
-        'button[type="submit"]',
-        'input[type="submit"]',
-        'button:contains("Submit")',
-        'button[name="submit"]',
-        'button.submit-btn',
-        'button[id*="submit"]',
-        '.btn-submit',
-        'button[onclick*="submit"]'
-    ];
-
-    let submitButton = null;
-
-    // Try to find submit button
-    for (const selector of submitSelectors) {
-        if (selector.includes(':contains')) {
-            // Custom handler for :contains pseudo-selector
-            const buttons = document.querySelectorAll('button, input[type="submit"]');
-            submitButton = Array.from(buttons).find(btn => 
-                btn.textContent.toLowerCase().includes('submit')
-            );
-        } else {
-            submitButton = document.querySelector(selector);
-        }
-
-        if (submitButton) {
-            console.log(`Formitra AI: Found submit button with selector: ${selector}`);
-            break;
-        }
-    }
-
-    if (!submitButton) {
-        console.warn("Formitra AI: Submit button not found. Manual submission may be required.");
-        showOTPModal();
-        return;
-    }
-
-    // Check if form is valid before submitting
-    const form = document.querySelector('form');
-    if (form && !form.checkValidity()) {
-        console.warn("Formitra AI: Form validation failed. Showing OTP modal instead of auto-submit.");
-        showOTPModal();
-        return;
-    }
-
-    console.log("Formitra AI: Auto-submitting form...");
-    
-    // Simulate user interaction to trigger any validation/handlers
-    submitButton.focus();
-    submitButton.click();
-
-    // Show success message
-    setTimeout(() => {
-        showOTPModal();
-    }, 1000);
-}
-
-/**
- * Show OTP verification modal (Coming Soon)
- */
-function showOTPModal() {
+function showNextStepsModal() {
     // Check if modal already exists
     if (document.getElementById('formitra-otp-modal')) {
         return;
@@ -308,17 +243,16 @@ function showOTPModal() {
         
         <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 4px; text-align: left; color: #1565c0;">
             <p style="margin: 0; font-weight: 600;">✓ All fields have been auto-filled</p>
-            <p style="margin: 10px 0 0 0; font-size: 14px;">Form has been automatically submitted</p>
+            <p style="margin: 10px 0 0 0; font-size: 14px;">Please review everything and submit manually on the official portal</p>
         </div>
 
         <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; text-align: left;">
-            <p style="margin: 0; font-weight: 600; color: #856404;">🔐 OTP Verification Coming Soon!</p>
+            <p style="margin: 0; font-weight: 600; color: #856404;">🔐 Security steps are always manual</p>
             <p style="margin: 10px 0 0 0; font-size: 14px; color: #856404;">
-                OTP auto-verification will be available in the next update. For now, please:
+                Formitra will never bypass OTP, CAPTCHA, or any security controls. Please:
             </p>
             <ul style="margin: 10px 0 0 0; padding-left: 20px; font-size: 14px; color: #856404;">
-                <li>Check your registered email for OTP</li>
-                <li>Enter OTP on the portal to complete submission</li>
+                <li>Complete OTP/CAPTCHA directly on the portal</li>
                 <li>Save your application reference number</li>
             </ul>
         </div>
@@ -354,5 +288,5 @@ function showOTPModal() {
         }
     });
 
-    console.log("Formitra AI: OTP verification modal shown");
+    console.log("Formitra AI: Next-steps modal shown");
 }

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, ShieldCheck, UploadCloud, AlertCircle, CheckCircle, FileText, Info } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
+import { AI_API_BASE_URL } from '../config/api';
 
 const LOCAL_STORAGE_FORM_KEY = 'formitra_form_data';
 
@@ -102,7 +103,7 @@ export default function DocumentUploadPage() {
                 formParams.append('documents', file);
             });
 
-            const response = await fetch('https://formitra-ai.onrender.com/api/verify-document', {
+            const response = await fetch(`${AI_API_BASE_URL}/api/verify-document`, {
                 method: 'POST',
                 body: formParams,
             });

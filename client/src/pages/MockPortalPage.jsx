@@ -19,7 +19,7 @@ const steps = [
 // Utility mapping from internal data keys to the \"passport\" field
 // keys used by the main Formitra app and the extension selectors.
 // This lets us pre-fill the mock portal when extension drives it.
-export const MOCK_PORTAL_FIELD_MAP = {
+const MOCK_PORTAL_FIELD_MAP = {
   givenName: 'givenName',
   surname: 'lastName',
   fatherGivenName: 'fatherName',

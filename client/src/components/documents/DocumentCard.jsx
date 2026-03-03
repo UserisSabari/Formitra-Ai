@@ -21,7 +21,6 @@ export default function DocumentCard({
     status, // 'missing' | 'valid' | 'invalid'
     issues = [],
 }) {
-    const isMissing = status === 'missing';
     const isValid = status === 'valid';
     const isInvalid = status === 'invalid';
 
