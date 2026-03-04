@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <meta charset="UTF-8" />
     <style>
         * {
             margin: 0;
@@ -173,18 +174,46 @@
             font-size: 12px;
         }
 
+        .steps {
+            margin-top: 8px;
+            margin-bottom: 8px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #f9fafb;
+            border: 1px dashed #d1d5db;
+            font-size: 11px;
+            color: #4b5563;
+        }
+
+        .steps-title {
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .steps ol {
+            padding-left: 18px;
+        }
+
+        .steps li {
+            margin-bottom: 2px;
+        }
+
         .footer {
             margin-top: 12px;
-            padding-top: 12px;
+            padding-top: 10px;
             border-top: 1px solid #e0e0e0;
             text-align: center;
             font-size: 11px;
-            color: #999;
+            color: #9ca3af;
         }
 
         .version {
             font-size: 10px;
-            color: #bbb;
+            color: #b3b8c2;
         }
     </style>
 </head>
@@ -205,6 +234,15 @@
             <div class="no-data">
                 <p>Loading...</p>
             </div>
+        </div>
+
+        <div class="steps">
+            <div class="steps-title">How to use</div>
+            <ol>
+                <li>On Formitra, complete your details and review.</li>
+                <li>Click <strong>Import from this tab</strong> once.</li>
+                <li>Open the official portal / mock portal and click <strong>Fill Application</strong>.</li>
+            </ol>
         </div>
 
         <div class="buttons">

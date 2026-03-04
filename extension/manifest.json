@@ -6,7 +6,8 @@
     "permissions": [
         "activeTab",
         "scripting",
-        "storage"
+        "storage",
+        "tabs"
     ],
     "action": {
         "default_popup": "popup.html",
@@ -19,7 +20,8 @@
         {
             "matches": [
                 "*://*.passportindia.gov.in/*",
-                "http://localhost:5173/*"
+                "http://localhost:5173/*",
+                "https://formitra-ai.vercel.app/mock-portal/*"
             ],
             "js": [
                 "content.js"

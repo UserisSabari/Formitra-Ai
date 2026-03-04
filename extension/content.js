@@ -40,6 +40,24 @@ window.addEventListener("message", (event) => {
         console.log("Formitra AI: Data captured from web app.", event.data.payload);
         chrome.storage.local.set({ appData: event.data.payload }, () => {
             console.log("Formitra AI: Data saved to extension storage.");
+
+            // If this is coming from the Formitra app (review page), ask background
+            // to open the hosted mock portal for automation.
+            try {
+                const href = window.location.href || "";
+                const isReviewPage = href.includes("/review/");
+                if (isReviewPage) {
+                    // Avoid opening multiple mock-portal tabs per session
+                    const openedKey = "formitra_mock_portal_opened_from_app";
+                    if (window.sessionStorage.getItem(openedKey) !== "true") {
+                        window.sessionStorage.setItem(openedKey, "true");
+                        chrome.runtime.sendMessage({ type: "OPEN_MOCK_PORTAL" });
+                        console.log("Formitra AI: Requested mock portal tab from background.");
+                    }
+                }
+            } catch (e) {
+                console.warn("Formitra AI: Could not evaluate review page URL for mock portal open.", e);
+            }
         });
     }
     
@@ -48,6 +66,125 @@ window.addEventListener("message", (event) => {
         console.log("Formitra AI: Form submitted successfully!", event.data.payload);
     }
 });
+
+// -------- Mock portal auto-run flow (localhost /mock-portal) --------
+
+function isMockPortalPage() {
+    const root = document.querySelector('[data-testid="mock-portal-root"]');
+    const step = document.querySelector('[data-testid="mock-step"]');
+    return !!(root && step);
+}
+
+function getMockPortalStep() {
+    const stepEl = document.querySelector('[data-testid="mock-step"]');
+    if (!stepEl) return 0;
+    const raw = stepEl.getAttribute('data-step');
+    const parsed = raw ? parseInt(raw, 10) : 0;
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForStepChange(previousStep, timeoutMs = 5000) {
+    const start = Date.now();
+    return new Promise((resolve) => {
+        const interval = setInterval(() => {
+            const current = getMockPortalStep();
+            if (current && current !== previousStep) {
+                clearInterval(interval);
+                resolve(true);
+                return;
+            }
+            if (Date.now() - start > timeoutMs) {
+                clearInterval(interval);
+                resolve(false);
+            }
+        }, 200);
+    });
+}
+
+async function runMockPortalFlow(appData) {
+    if (!appData || !appData.data) return;
+
+    const service = appData.service || "passport";
+    const data = appData.data;
+
+    console.log("Formitra AI: Starting mock portal auto-flow");
+
+    // Avoid running multiple times per page load
+    const autofillKey = "formitra_mock_portal_autofilled";
+    if (window.sessionStorage.getItem(autofillKey) === "true") {
+        console.log("Formitra AI: Mock portal already auto-filled in this session.");
+        return;
+    }
+    window.sessionStorage.setItem(autofillKey, "true");
+
+    // We will attempt a small finite number of steps
+    const maxSteps = 5;
+    let currentStep = getMockPortalStep() || 1;
+
+    for (let i = 0; i < maxSteps; i++) {
+        console.log(`Formitra AI: Filling mock portal step ${currentStep}`);
+        fillFormIntelligently(data, service);
+
+        await sleep(800);
+
+        const nextBtn = document.querySelector('[data-testid="mock-next"]');
+        if (!nextBtn || nextBtn.disabled) {
+            console.log("Formitra AI: No next button found or it is disabled, stopping auto-flow.");
+            break;
+        }
+
+        const beforeStep = getMockPortalStep() || currentStep;
+        nextBtn.click();
+        const changed = await waitForStepChange(beforeStep);
+
+        if (!changed) {
+            console.log("Formitra AI: Step did not change after clicking next, stopping.");
+            break;
+        }
+
+        currentStep = getMockPortalStep() || currentStep + 1;
+    }
+
+    // Try to submit at the end if a submit button exists
+    const submitBtn = document.querySelector('[data-testid="mock-submit"]');
+    if (submitBtn && !submitBtn.disabled) {
+        console.log("Formitra AI: Clicking mock portal submit button.");
+        submitBtn.click();
+    } else {
+        console.log("Formitra AI: No enabled submit button found at the end of flow.");
+    }
+}
+
+function maybeAutoRunOnMockPortal() {
+    if (!isMockPortalPage()) {
+        return;
+    }
+
+    chrome.storage.local.get(["appData"], (result) => {
+        const appData = result.appData;
+        if (!appData || !appData.data) {
+            console.log("Formitra AI: No appData in storage to auto-fill mock portal.");
+            return;
+        }
+
+        runMockPortalFlow(appData).catch((err) => {
+            console.error("Formitra AI: Error during mock portal auto-flow", err);
+        });
+    });
+}
+
+// Try auto-run once the DOM is ready on mock portal
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    setTimeout(maybeAutoRunOnMockPortal, 800);
+} else {
+    document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(maybeAutoRunOnMockPortal, 800);
+    });
+}
 
 /**
  * Intelligently fill form fields using multiple selector strategies
