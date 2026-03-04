@@ -5,126 +5,21 @@ console.log("Formitra AI Assistant: Loaded on portal.");
 
 // Field selector mappings for intelligent field detection
 const FIELD_SELECTORS = {
-    // Names/IDs used on both official portals and the mock portal
-    firstName: [
-        '#givenName',
-        'input[name="givenName"]',
-        'input[placeholder*="first name" i]',
-        'input[placeholder*="given name" i]'
-    ],
-    lastName: [
-        '#surname',
-        '#lastName',
-        'input[name="surname"]',
-        'input[name="lastName"]',
-        'input[placeholder*="last name" i]'
-    ],
-    fatherName: [
-        '#fatherName',
-        '#fathersName',
-        'input[name="fatherName"]',
-        'input[name="fatherGivenName"]',
-        'input[placeholder*="father" i]'
-    ],
-    email: [
-        '#email',
-        '#emailAddress',
-        'input[name="email"]',
-        'input[name="addrEmail"]',
-        'input[type="email"]',
-        'input[placeholder*="email" i]'
-    ],
-    mobile: [
-        '#mobile',
-        '#mobileNumber',
-        '#phone',
-        'input[name="mobile"]',
-        'input[name="addrMobile"]',
-        'input[name="phone"]',
-        'input[type="tel"]',
-        'input[placeholder*="mobile" i]'
-    ],
-    dob: [
-        '#dob',
-        '#dateOfBirth',
-        'input[name="dob"]',
-        'input[name="prevIssueDate"]',
-        'input[name="prevExpiryDate"]',
-        'input[name="dateOfBirth"]',
-        'input[type="date"]',
-        'input[placeholder*="date of birth" i]'
-    ],
-    gender: [
-        '#gender',
-        '#sex',
-        'select[name="gender"]',
-        'select[name="sex"]',
-        'input[name="gender"]'
-    ],
-    maritalStatus: [
-        '#maritalStatus',
-        '#maritalStatuses',
-        'select[name="maritalStatus"]',
-        'input[name="maritalStatus"]',
-        'input[placeholder*="marital" i]'
-    ],
-    address: [
-        '#address',
-        '#fullAddress',
-        'textarea[name="address"]',
-        'input[name="address"]',
-        'input[name="emergencyAddress"]',
-        'input[name="ref1Address"]',
-        'input[name="ref2Address"]',
-        'input[placeholder*="address" i]'
-    ],
-    city: [
-        '#city',
-        '#cityName',
-        'input[name="city"]',
-        'input[name="village"]',
-        'input[name="permaVillage"]',
-        'input[name="pob"]',
-        'input[placeholder*="city" i]'
-    ],
-    pincode: [
-        '#pincode',
-        '#zipcode',
-        '#postalCode',
-        'input[name="pincode"]',
-        'input[name="permaPincode"]',
-        'input[name="zipcode"]',
-        'input[placeholder*="pin" i]'
-    ],
-    state: [
-        '#state',
-        '#stateCode',
-        'select[name="state"]',
-        'select[name="state2"]',
-        'select[name="permaState"]',
-        'input[name="state"]',
-        'input[placeholder*="state" i]'
-    ],
-    passportType: [
-        '#passportType',
-        '#type',
-        'select[name="passportType"]',
-        'input[name="passportType"]',
-        'input[name="appType"]'
-    ],
-    occupation: [
-        '#occupation',
-        'input[name="occupation"]',
-        'input[name="employment"]',
-        'input[placeholder*="occupation" i]'
-    ],
-    oldPassportNumber: [
-        '#oldPassportNumber',
-        '#previousPassport',
-        'input[name="oldPassportNumber"]',
-        'input[name="prevPassportNo"]',
-        'input[placeholder*="old passport" i]'
-    ]
+    firstName: ['#givenName', 'input[name="givenName"]', 'input[placeholder*="first name" i]', 'input[placeholder*="given name" i]'],
+    lastName: ['#surname', '#lastName', 'input[name="surname"]', 'input[name="lastName"]', 'input[placeholder*="last name" i]'],
+    fatherName: ['#fatherName', '#fathersName', 'input[name="fatherName"]', 'input[placeholder*="father" i]'],
+    email: ['#email', '#emailAddress', 'input[name="email"]', 'input[type="email"]', 'input[placeholder*="email" i]'],
+    mobile: ['#mobile', '#mobileNumber', '#phone', 'input[name="mobile"]', 'input[name="phone"]', 'input[type="tel"]', 'input[placeholder*="mobile" i]'],
+    dob: ['#dob', '#dateOfBirth', 'input[name="dob"]', 'input[name="dateOfBirth"]', 'input[type="date"]', 'input[placeholder*="date of birth" i]'],
+    gender: ['#gender', '#sex', 'select[name="gender"]', 'select[name="sex"]', 'input[name="gender"]'],
+    maritalStatus: ['#maritalStatus', '#maritalStatuses', 'select[name="maritalStatus"]', 'input[name="maritalStatus"]', 'input[placeholder*="marital" i]'],
+    address: ['#address', '#fullAddress', 'textarea[name="address"]', 'input[name="address"]', 'input[placeholder*="address" i]'],
+    city: ['#city', '#cityName', 'input[name="city"]', 'input[placeholder*="city" i]'],
+    pincode: ['#pincode', '#zipcode', '#postalCode', 'input[name="pincode"]', 'input[name="zipcode"]', 'input[placeholder*="pin" i]'],
+    state: ['#state', '#stateCode', 'select[name="state"]', 'input[name="state"]', 'input[placeholder*="state" i]'],
+    passportType: ['#passportType', '#type', 'select[name="passportType"]', 'input[name="passportType"]'],
+    occupation: ['#occupation', 'input[name="occupation"]', 'input[placeholder*="occupation" i]'],
+    oldPassportNumber: ['#oldPassportNumber', '#previousPassport', 'input[name="oldPassportNumber"]', 'input[placeholder*="old passport" i]']
 };
 
 // Listen for a "Fill Form" request from the extension popup
@@ -145,24 +40,6 @@ window.addEventListener("message", (event) => {
         console.log("Formitra AI: Data captured from web app.", event.data.payload);
         chrome.storage.local.set({ appData: event.data.payload }, () => {
             console.log("Formitra AI: Data saved to extension storage.");
-
-            // If this is coming from the Formitra app (review page), ask background
-            // to open the hosted mock portal for automation.
-            try {
-                const href = window.location.href || "";
-                const isReviewPage = href.includes("/review/");
-                if (isReviewPage) {
-                    // Avoid opening multiple mock-portal tabs per session
-                    const openedKey = "formitra_mock_portal_opened_from_app";
-                    if (window.sessionStorage.getItem(openedKey) !== "true") {
-                        window.sessionStorage.setItem(openedKey, "true");
-                        chrome.runtime.sendMessage({ type: "OPEN_MOCK_PORTAL" });
-                        console.log("Formitra AI: Requested mock portal tab from background.");
-                    }
-                }
-            } catch (e) {
-                console.warn("Formitra AI: Could not evaluate review page URL for mock portal open.", e);
-            }
         });
     }
     
@@ -172,7 +49,7 @@ window.addEventListener("message", (event) => {
     }
 });
 
-// -------- Mock portal auto-run flow (hosted /mock-portal) --------
+// -------- Mock portal auto-run flow (localhost /mock-portal) --------
 
 function isMockPortalPage() {
     const root = document.querySelector('[data-testid="mock-portal-root"]');
@@ -218,22 +95,13 @@ async function runMockPortalFlow(appData) {
 
     console.log("Formitra AI: Starting mock portal auto-flow");
 
-    // We intentionally do NOT drive the login / account creation step (step 1)
-    // so that credentials are always entered manually by the user.
-    const initialStep = getMockPortalStep() || 1;
-    if (initialStep <= 1) {
-        console.log("Formitra AI: On login/account step – automation will start from Application Type onwards.");
-        return;
-    }
-
     // Avoid running multiple times per page load
     const autofillKey = "formitra_mock_portal_autofilled";
     if (window.sessionStorage.getItem(autofillKey) === "true") {
         console.log("Formitra AI: Mock portal already auto-filled in this session.");
         return;
     }
-    // Mark as running; we'll flip this to "true" only once we finish the flow.
-    window.sessionStorage.setItem(autofillKey, "running");
+    window.sessionStorage.setItem(autofillKey, "true");
 
     // We will attempt a small finite number of steps
     const maxSteps = 5;
@@ -242,15 +110,6 @@ async function runMockPortalFlow(appData) {
     for (let i = 0; i < maxSteps; i++) {
         console.log(`Formitra AI: Filling mock portal step ${currentStep}`);
         fillFormIntelligently(data, service);
-
-        // For the mock portal we can also safely backfill any required fields
-        // that don't exist in the Formitra dataset with neutral demo values,
-        // to allow "Next" buttons to enable during the demo flow.
-        try {
-            fillMockPortalRequiredFallbacks();
-        } catch (e) {
-            console.warn("Formitra AI: Error while filling mock-portal fallback fields", e);
-        }
 
         await sleep(800);
 
@@ -280,86 +139,6 @@ async function runMockPortalFlow(appData) {
     } else {
         console.log("Formitra AI: No enabled submit button found at the end of flow.");
     }
-
-    // Mark the flow as completed for this tab session
-    window.sessionStorage.setItem(autofillKey, "true");
-}
-
-/**
- * For the mock demo portal only:
- * fill any visible required fields in the current step with safe
- * placeholder values so that "Next" buttons can enable even when
- * Formitra does not have real data for them (emergency contacts, etc).
- */
-function fillMockPortalRequiredFallbacks() {
-    if (!isMockPortalPage()) return;
-
-    const stepRoot = document.querySelector('[data-testid="mock-step"]');
-    if (!stepRoot) return;
-
-    // Handle <input>, <select>, and <textarea> that are required and empty.
-    const inputs = stepRoot.querySelectorAll('input[required], select[required], textarea[required]');
-
-    const now = new Date();
-    const y = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    const today = `${y}-${mm}-${dd}`;
-
-    const pickedRadios = new Set();
-
-    inputs.forEach((el) => {
-        const tag = el.tagName.toLowerCase();
-        const type = (el.type || "").toLowerCase();
-        const name = el.name || "";
-
-        // Radio groups: pick one option per group if none selected
-        if (type === "radio") {
-            if (pickedRadios.has(name)) return;
-            const group = stepRoot.querySelectorAll(`input[type="radio"][name="${CSS.escape(name)}"]`);
-            const anyChecked = Array.from(group).some((g) => g.checked);
-            if (!anyChecked && group.length > 0) {
-                group[0].checked = true;
-                group[0].dispatchEvent(new Event("change", { bubbles: true }));
-            }
-            pickedRadios.add(name);
-            return;
-        }
-
-        // Skip if already has a value
-        if ((el.value || "").trim() !== "") return;
-
-        if (tag === "select") {
-            // Prefer the first non-empty option
-            const options = Array.from(el.options);
-            const opt = options.find((o) => o.value && o.value.trim() !== "");
-            if (opt) {
-                el.value = opt.value;
-                el.dispatchEvent(new Event("change", { bubbles: true }));
-            }
-            return;
-        }
-
-        // Text-like required fields: choose a neutral demo value
-        let value = "N/A";
-        if (type === "date") {
-            value = today;
-        } else if (type === "tel" || type === "number") {
-            value = "9999999999";
-        } else if (type === "email") {
-            value = "demo@example.com";
-        } else if (name.toLowerCase().includes("name")) {
-            value = "Demo Name";
-        } else if (name.toLowerCase().includes("address")) {
-            value = "Demo address for mock portal";
-        } else if (name.toLowerCase().includes("passport")) {
-            value = "A1234567";
-        }
-
-        el.value = value;
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-    });
 }
 
 function maybeAutoRunOnMockPortal() {

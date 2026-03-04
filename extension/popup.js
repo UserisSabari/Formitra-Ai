@@ -116,10 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function renderPortalError(message) {
-        statusEl.innerHTML += `<div class="error">${message}</div>`;
-    }
-
     // Fill Form button click handler (works on portal tabs where content.js is injected)
     fillBtn.addEventListener('click', () => {
         fillBtn.disabled = true;
@@ -143,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     (response) => {
                         if (chrome.runtime.lastError) {
                             console.error('Error:', chrome.runtime.lastError);
-                            renderPortalError('This page is not a supported portal yet. Open the official or mock portal, refresh it once, then click "Fill Application" again.');
+                            statusEl.innerHTML += '<div class="error">Open the official portal tab and refresh, then try again.</div>';
                         } else {
                             console.log('Form filling started', response);
                         }
