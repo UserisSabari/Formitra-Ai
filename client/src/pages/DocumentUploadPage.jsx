@@ -230,7 +230,7 @@ export default function DocumentUploadPage() {
                     <div className="space-y-4">
                         <h4 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                             <FileText size={20} className="text-indigo-600" />
-                            To be analyzed
+                            Documents ready for AI check
                         </h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {selectedFiles.map((file, idx) => (
@@ -239,9 +239,17 @@ export default function DocumentUploadPage() {
                                         <div className="w-8 h-8 rounded bg-indigo-50 flex items-center justify-center text-indigo-500 flex-shrink-0 font-bold text-xs uppercase">
                                             {file.name.split('.').pop()}
                                         </div>
-                                        <span className="text-sm text-gray-800 truncate font-medium">{file.name}</span>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm text-gray-800 truncate font-medium">{file.name}</span>
+                                            <span className="text-xs text-gray-500">
+                                                {(file.size / (1024 * 1024)).toFixed(2)} MB
+                                            </span>
+                                        </div>
                                     </div>
-                                    <button onClick={() => removeFile(idx)} className="text-xs text-red-500 hover:text-red-700 hover:underline font-medium px-2">
+                                    <button
+                                        onClick={() => removeFile(idx)}
+                                        className="text-xs text-red-500 hover:text-red-700 hover:underline font-medium px-2"
+                                    >
                                         Remove
                                     </button>
                                 </div>
@@ -257,6 +265,19 @@ export default function DocumentUploadPage() {
                         <p className="text-sm text-gray-500 max-w-sm mx-auto">Reading text, checking logical consistency, and looking for discrepancies against your application data.</p>
                     </div>
                 )}
+
+                {/* High-level error banner for backend / network failures */}
+                {!isVerifying &&
+                    aiPackageResult &&
+                    aiPackageResult.packageStatus === 'Error' &&
+                    (!aiPackageResult.documentBreakdown || aiPackageResult.documentBreakdown.length === 0) &&
+                    aiPackageResult.collectiveInsights &&
+                    aiPackageResult.collectiveInsights.toLowerCase().includes('failed to communicate') && (
+                        <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-800">
+                            We couldn&apos;t reach the AI verification service right now. Please check your connection and try again,
+                            or continue without AI checks.
+                        </div>
+                    )}
 
                 {aiPackageResult && !isVerifying && (
                     <div className="space-y-6 pt-4">
@@ -336,14 +357,19 @@ export default function DocumentUploadPage() {
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-8">
-                    <button
-                        type="button"
-                        onClick={handleVerifyWithAI}
-                        className="btn-secondary flex-1 sm:flex-none sm:w-64 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
-                        disabled={isVerifying || selectedFiles.length === 0}
-                    >
-                        {isVerifying ? 'Analyzing...' : 'Analyze with Gemini AI'}
-                    </button>
+                    <div className="flex flex-col flex-1 sm:flex-none sm:w-64 gap-1">
+                        <button
+                            type="button"
+                            onClick={handleVerifyWithAI}
+                            className="btn-secondary w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                            disabled={isVerifying || selectedFiles.length === 0}
+                        >
+                            {isVerifying ? 'Analyzing documents…' : 'Analyze documents with AI'}
+                        </button>
+                        <p className="text-[11px] text-gray-500 text-left">
+                            This may take up to a minute while Gemini reads and compares all pages.
+                        </p>
+                    </div>
                     <button
                         type="button"
                         onClick={handleContinueToReview}

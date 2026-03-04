@@ -4,10 +4,16 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
 const uploadRoutes = require('./routes/upload');
 
-app.use(cors());
+// Allow only the configured frontend origin in production.
+// For local dev, this defaults to http://localhost:5173.
+app.use(cors({
+  origin: CLIENT_ORIGIN,
+  credentials: false,
+}));
 app.use(express.json());
 app.use('/api', uploadRoutes);
 
