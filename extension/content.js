@@ -28,8 +28,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.log("Formitra AI: Received fill form request", request.data);
         const data = request.data;
         const service = request.service || 'passport';
+        const files = request.files || [];
         
-        fillFormIntelligently(data, service);
+        fillFormIntelligently(data, service, files);
         sendResponse({ status: "success", message: "Form filling initiated" });
     }
 });
@@ -109,7 +110,10 @@ async function runMockPortalFlow(appData) {
 
     for (let i = 0; i < maxSteps; i++) {
         console.log(`Formitra AI: Filling mock portal step ${currentStep}`);
-        fillFormIntelligently(data, service);
+        fillFormIntelligently(data, service, appData.files || []);
+        
+        // Backfill remaining empty required fields with demo values to enable the Next button
+        backfillDemoData();
 
         await sleep(800);
 
@@ -172,10 +176,22 @@ if (document.readyState === "complete" || document.readyState === "interactive")
  * Intelligently fill form fields using multiple selector strategies
  * @param {Object} data - Form data to fill
  * @param {String} service - Service type (e.g., 'passport')
+ * @param {Array} files - Array of attached file objects
  */
-function fillFormIntelligently(data, service) {
+function fillFormIntelligently(data, service, files = []) {
     console.log(`Formitra AI: Starting intelligent form fill for ${service}`);
     
+    // Show top-right visual feedback
+    const toast = document.createElement('div');
+    toast.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Formitra AI is bridging data...`;
+    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #0f172a; color: white; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: sans-serif; z-index: 99999; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; transition: opacity 0.3s;';
+    const styleBlock = document.createElement('style');
+    styleBlock.innerHTML = '@keyframes spin { 100% { transform: rotate(360deg); } }';
+    document.head.appendChild(styleBlock);
+    document.body.appendChild(toast);
+
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+
     let filledCount = 0;
     let totalCount = Object.keys(data).length;
 
@@ -210,9 +226,86 @@ function fillFormIntelligently(data, service) {
 
     console.log(`Formitra AI: Filled ${filledCount}/${totalCount} fields`);
 
+    // Auto-fill File Attachments if provided
+    if (files && files.length > 0) {
+        const fileInputs = Array.from(document.querySelectorAll('input[type="file"]'));
+        if (fileInputs.length > 0) {
+            console.log(`Formitra AI: Auto-filling ${files.length} documents...`);
+            let fileIndex = 0;
+            fileInputs.forEach(input => {
+                if (!input.classList.contains('formitra-filled')) {
+                    const fileObj = files[fileIndex % files.length];
+                    fillFileInput(input, fileObj);
+                    fileIndex++;
+                }
+            });
+        }
+    }
+
     setTimeout(() => {
         showNextStepsModal();
     }, 1500);
+}
+
+/**
+ * Automagically backfill demo data to any required empty fields (Mock Portal only)
+ */
+function backfillDemoData() {
+    const requiredInputs = document.querySelectorAll('input[required], select[required]');
+    requiredInputs.forEach(el => {
+        // Skip if already filled
+        if (el.classList.contains('formitra-filled')) return;
+        if (el.value !== '' && el.type !== 'radio' && el.type !== 'checkbox') return;
+        
+        const type = (el.type || '').toLowerCase();
+        if (el.tagName.toLowerCase() === 'select') {
+            // Pick secondary option, to avoid picking a default disabled placeholder
+            const validOptions = Array.from(el.options).filter(o => o.value !== '');
+            if (validOptions.length > 0) {
+                fillElement(el, validOptions[0].value, el.name);
+            }
+        } else if (type === 'radio') {
+            // If group has no checked, click the first one
+            const group = document.querySelectorAll(`input[name="${el.name}"]`);
+            const isChecked = Array.from(group).some(r => r.checked);
+            if (!isChecked) {
+                el.checked = true;
+                el.classList.add('formitra-filled');
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        } else if (type === 'date') {
+            fillElement(el, '2000-01-01', el.name);
+        } else {
+            fillElement(el, 'Demo Value', el.name);
+        }
+        console.log(`Formitra AI: Demo backfilled -> ${el.name}`);
+    });
+}
+
+/**
+ * Auto fill file inputs using DataTransfer to convert Base64 back to File objects
+ */
+function fillFileInput(input, fileObj) {
+    if (!fileObj.base64) return;
+    try {
+        const byteString = atob(fileObj.base64.split(',')[1]);
+        const mimeString = fileObj.base64.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: mimeString });
+        const file = new File([blob], fileObj.name, { type: mimeString });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        input.classList.add('formitra-filled');
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        console.log(`Formitra AI: ✓ Attached ${fileObj.name} to file input`);
+    } catch (e) {
+        console.error('Formitra AI: Error attaching file:', e);
+    }
 }
 
 /**
@@ -357,42 +450,50 @@ function showNextStepsModal() {
     `;
 
     modalContent.innerHTML = `
-        <div style="font-size: 48px; margin-bottom: 20px;">✓</div>
-        <h2 style="color: #1a237e; margin-bottom: 15px; font-size: 24px; font-weight: 700;">Form Auto-Fill Complete!</h2>
+        <div style="font-size: 40px; margin-bottom: 20px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <h2 style="color: #0f172a; margin-bottom: 15px; font-size: 20px; font-weight: 700;">Data Injection Complete</h2>
         
-        <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 4px; text-align: left; color: #1565c0;">
-            <p style="margin: 0; font-weight: 600;">✓ All fields have been auto-filled</p>
-            <p style="margin: 10px 0 0 0; font-size: 14px;">Please review everything and submit manually on the official portal</p>
+        <div style="background: #f8fafc; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0; border-radius: 4px; text-align: left; color: #0f172a;">
+            <p style="margin: 0; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Payload mapping successful
+            </p>
+            <p style="margin: 10px 0 0 0; font-size: 13px; color: #475569;">Please review the injected data block. Manual security verification is required to proceed.</p>
         </div>
 
-        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; text-align: left;">
-            <p style="margin: 0; font-weight: 600; color: #856404;">🔐 Security steps are always manual</p>
+        <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px; text-align: left;">
+            <p style="margin: 0; font-weight: 600; color: #92400e; display: flex; align-items: center; gap: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Protocol Restriction Notice
+            </p>
             <p style="margin: 10px 0 0 0; font-size: 14px; color: #856404;">
                 Formitra will never bypass OTP, CAPTCHA, or any security controls. Please:
             </p>
             <ul style="margin: 10px 0 0 0; padding-left: 20px; font-size: 14px; color: #856404;">
-                <li>Complete OTP/CAPTCHA directly on the portal</li>
-                <li>Save your application reference number</li>
+                <li>Resolve all CAPTCHA/OTP challenges locally.</li>
+                <li>Archive your generated reference code safely.</li>
             </ul>
         </div>
 
         <div style="margin-top: 30px;">
             <button onclick="document.getElementById('formitra-otp-modal').remove()" style="
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background-color: #0f172a;
                 color: white;
-                border: none;
-                padding: 12px 30px;
+                border: 1px solid #0f172a;
+                padding: 10px 24px;
                 border-radius: 6px;
-                font-size: 16px;
+                font-size: 14px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: transform 0.2s;
-            " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                Got it!
+                transition: background-color 0.15s;
+            " onmouseover="this.style.backgroundColor='#1e293b'" onmouseout="this.style.backgroundColor='#0f172a'">
+                Acknowledge & Close
             </button>
         </div>
 
-        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+        <p style="margin-top: 24px; font-size: 11px; color: #94a3b8; font-weight: 500;">
             Powered by Formitra AI
         </p>
     `;

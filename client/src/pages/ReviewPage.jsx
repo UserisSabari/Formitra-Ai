@@ -43,13 +43,20 @@ export default function ReviewPage() {
 
     const handleSubmit = () => {
         // Send data to extension
+        let files = [];
+        try {
+            const raw = localStorage.getItem('formitra_files');
+            if (raw) files = JSON.parse(raw);
+        } catch(e) {}
+
         if (window.chrome?.runtime) {
             window.postMessage({
                 type: 'FORMITRA_SAVE_DATA',
                 payload: {
                     service: serviceId,
                     state: decodedState,
-                    data: formData
+                    data: formData,
+                    files: files
                 }
             }, '*');
         }
@@ -58,7 +65,8 @@ export default function ReviewPage() {
         localStorage.setItem('formitra_app_data', JSON.stringify({
             service: serviceId,
             state: decodedState,
-            data: formData
+            data: formData,
+            files: files
         }));
 
         // After saving, move to the Success page which guides

@@ -51,9 +51,7 @@ export default function DocumentUploadPage() {
                         fileType: 'image/jpeg'  // Force conversion to standard JPEG for Gemini
                     };
                     try {
-                        console.log(`Compressing ${file.name}... Original size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
                         const compressedFile = await imageCompression(file, options);
-                        console.log(`Compressed ${file.name} to ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
 
                         // browser-image-compression returns a Blob, we convert it back to a File object with the original name
                         const finalFile = new File([compressedFile], file.name, {
@@ -129,12 +127,36 @@ export default function DocumentUploadPage() {
         }
     };
 
-    const handleContinueToReview = () => {
+    const handleContinueToReview = async () => {
         if (aiPackageResult) {
             localStorage.setItem('formitra_document_validation', JSON.stringify(aiPackageResult));
         } else {
             localStorage.removeItem('formitra_document_validation');
         }
+
+        if (selectedFiles.length > 0) {
+            try {
+                const filePromises = selectedFiles.map(file => {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve({
+                            name: file.name,
+                            type: file.type,
+                            base64: reader.result
+                        });
+                        reader.onerror = error => reject(error);
+                        reader.readAsDataURL(file);
+                    });
+                });
+                const base64Files = await Promise.all(filePromises);
+                localStorage.setItem('formitra_files', JSON.stringify(base64Files));
+            } catch (error) {
+                console.error('Formitra AI: Error saving files to localStorage', error);
+            }
+        } else {
+            localStorage.removeItem('formitra_files');
+        }
+
         navigate(`/review/${serviceId}/${encodeURIComponent(decodedState)}`);
     };
 
