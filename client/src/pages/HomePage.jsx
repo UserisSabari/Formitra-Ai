@@ -10,7 +10,7 @@ const services = [
         id: 'passport', 
         name: 'Passport Services', 
         icon: Shield, 
-        color: 'indigo',
+        color: 'slate',
         time: '3 min', 
         status: 'live',
         description: 'Apply for new passport or renewal'
@@ -19,7 +19,7 @@ const services = [
         id: 'income', 
         name: 'Income Certificate', 
         icon: FileText, 
-        color: 'emerald',
+        color: 'slate',
         time: '2 min', 
         status: 'soon',
         description: 'Get your income certificate online'
@@ -28,7 +28,7 @@ const services = [
         id: 'domicile', 
         name: 'Domicile Certificate', 
         icon: Home, 
-        color: 'purple',
+        color: 'slate',
         time: '2 min', 
         status: 'soon',
         description: 'Apply for domicile certificate'
@@ -37,7 +37,7 @@ const services = [
         id: 'driving', 
         name: 'Driving License', 
         icon: Car, 
-        color: 'orange',
+        color: 'slate',
         time: '4 min', 
         status: 'soon',
         description: 'New license or renewal'
@@ -46,7 +46,7 @@ const services = [
         id: 'ration', 
         name: 'Ration Card', 
         icon: Wallet, 
-        color: 'amber',
+        color: 'slate',
         time: '3 min', 
         status: 'soon',
         description: 'Apply for ration card'
@@ -55,7 +55,7 @@ const services = [
         id: 'birth', 
         name: 'Birth Certificate', 
         icon: Baby, 
-        color: 'pink',
+        color: 'slate',
         time: '3 min', 
         status: 'soon',
         description: 'Get birth certificate online'
@@ -63,12 +63,10 @@ const services = [
 ];
 
 const colorClasses = {
-    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-200',
-    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-200',
-    purple: 'bg-purple-50 text-purple-600 border-purple-200',
-    orange: 'bg-orange-50 text-orange-600 border-orange-200',
-    amber: 'bg-amber-50 text-amber-600 border-amber-200',
-    pink: 'bg-pink-50 text-pink-600 border-pink-200'
+    slate: 'bg-slate-50 text-slate-700 border-slate-200',
+    blue: 'bg-blue-50 text-blue-700 border-blue-200',
+    emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    amber: 'bg-amber-50 text-amber-700 border-amber-200'
 };
 
 export default function HomePage() {
@@ -76,9 +74,9 @@ export default function HomePage() {
 
     const handleServiceSelect = (service) => {
         if (service.status === 'soon') {
-            navigate(`/coming-soon/${service.id}`);
+            navigate(`/apply/${service.id}/coming-soon`);
         } else {
-            navigate(`/select-state/${service.id}`);
+            navigate(`/apply/${service.id}/state`);
         }
     };
 
@@ -94,9 +92,9 @@ export default function HomePage() {
                         className="space-y-8"
                     >
                         {/* Badge */}
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-full">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-200 rounded-md">
                             <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                            <span className="text-sm font-medium text-indigo-700">AI-Powered Platform</span>
+                            <span className="text-sm font-semibold text-slate-700">Enterprise AI Engine</span>
                         </div>
 
                         {/* Main Heading */}
@@ -114,7 +112,7 @@ export default function HomePage() {
                         {/* CTA Buttons */}
                         <div className="flex flex-wrap justify-center gap-4 pt-4">
                             <button
-                                onClick={() => navigate('/select-state/passport')}
+                                onClick={() => navigate('/apply/passport/state')}
                                 className="btn-primary text-base px-8 py-3.5"
                             >
                                 <Sparkles size={20} />
@@ -140,7 +138,7 @@ export default function HomePage() {
                                     transition={{ delay: 0.3 + i * 0.1 }}
                                     className="card p-6 text-center"
                                 >
-                                    <stat.icon className="w-6 h-6 text-indigo-600 mx-auto mb-2" />
+                                    <stat.icon className="w-6 h-6 text-slate-800 mx-auto mb-2" />
                                     <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
                                     <div className="text-sm text-gray-600">{stat.label}</div>
                                 </motion.div>
@@ -153,9 +151,9 @@ export default function HomePage() {
             {/* Services Grid */}
             <section className="container">
                 <div className="text-center mb-12">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-full mb-4">
-                        <Sparkles size={16} className="text-indigo-600" />
-                        <span className="text-sm font-medium text-indigo-700">Available Services</span>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-200 rounded-md mb-4">
+                        <Shield className="text-slate-700" size={16} />
+                        <span className="text-sm font-semibold text-slate-700">Available Integrations</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Choose Your Service</h2>
                     <p className="text-lg text-gray-600">Select any service to get started instantly</p>
@@ -205,8 +203,8 @@ export default function HomePage() {
                                     )}
 
                                     {/* Arrow */}
-                                    <div className="mt-6 flex items-center gap-2 text-indigo-600 font-medium text-sm">
-                                        Get Started
+                                    <div className="mt-6 flex items-center gap-2 text-slate-800 font-semibold text-sm">
+                                        Configure Module
                                         <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </div>
@@ -218,7 +216,7 @@ export default function HomePage() {
 
             {/* How it Works */}
             <section className="container">
-                <div className="card p-8 md:p-12 bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-100">
+                <div className="card p-8 md:p-12 bg-slate-50 border-slate-200">
                     <div className="text-center mb-12">
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">How It Works</h2>
                         <p className="text-lg text-gray-600">Three simple steps to complete your application</p>
@@ -260,11 +258,11 @@ export default function HomePage() {
                                 >
                                     {/* Number Badge */}
                                     <div className="relative inline-block mb-6">
-                                        <div className={`w-20 h-20 rounded-2xl ${colorClasses[step.color]} flex items-center justify-center border shadow-sm`}>
-                                            <StepIcon size={32} />
+                                        <div className={`w-16 h-16 rounded-lg ${colorClasses[step.color]} flex items-center justify-center border shadow-sm`}>
+                                            <StepIcon size={28} />
                                         </div>
-                                        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-sm">
-                                            <span className="text-sm font-bold text-gray-900">{step.num}</span>
+                                        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-sm bg-slate-900 flex items-center justify-center shadow-sm">
+                                            <span className="text-sm font-bold text-white">{step.num}</span>
                                         </div>
                                     </div>
 
@@ -286,10 +284,10 @@ export default function HomePage() {
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                        { icon: Zap, title: 'Lightning Fast', desc: 'Complete in 3 minutes', color: 'amber' },
-                        { icon: Lock, title: '100% Secure', desc: 'Your data stays safe', color: 'emerald' },
-                        { icon: Sparkles, title: 'AI-Powered', desc: 'Smart technology', color: 'indigo' },
-                        { icon: CheckCircle2, title: 'Zero Errors', desc: 'Validated forms', color: 'purple' }
+                        { icon: Zap, title: 'Lightning Fast', desc: 'Process applications instantly', color: 'amber' },
+                        { icon: Lock, title: '100% Secure', desc: 'Local memory execution', color: 'emerald' },
+                        { icon: Shield, title: 'Compliant', desc: 'Auto-adapts to regulations', color: 'slate' },
+                        { icon: CheckCircle2, title: 'Zero Errors', desc: 'Pre-validated pipelines', color: 'slate' }
                     ].map((feature, i) => {
                         const FeatureIcon = feature.icon;
                         return (
@@ -299,9 +297,9 @@ export default function HomePage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
-                                className="card p-6 text-center"
+                                className="card p-6 text-center border-slate-200"
                             >
-                                <div className={`w-12 h-12 rounded-xl ${colorClasses[feature.color]} flex items-center justify-center mx-auto mb-4 border`}>
+                                <div className={`w-12 h-12 rounded-lg ${colorClasses[feature.color]} flex items-center justify-center mx-auto mb-4 border`}>
                                     <FeatureIcon size={20} />
                                 </div>
                                 <h4 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h4>
@@ -314,24 +312,24 @@ export default function HomePage() {
 
             {/* CTA */}
             <section className="container">
-                <div className="card p-12 md:p-16 text-center bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
+                <div className="card p-12 md:p-16 text-center bg-slate-900 border-slate-800 text-white">
                     <div className="max-w-2xl mx-auto space-y-6">
-                        <Sparkles className="w-12 h-12 mx-auto text-white/90" />
-                        <h2 className="text-4xl md:text-5xl font-bold">Ready to Get Started?</h2>
-                        <p className="text-xl text-indigo-100">
-                            Join <span className="font-semibold text-white">2,500+ users</span> who simplified their paperwork
+                        <Shield className="w-12 h-12 mx-auto text-amber-500" />
+                        <h2 className="text-4xl md:text-5xl font-bold">Ready to Deploy?</h2>
+                        <p className="text-xl text-slate-300">
+                            Join the <span className="font-semibold text-white">enterprise teams</span> accelerating their regulatory pipelines.
                         </p>
 
                         <button
-                            onClick={() => navigate('/select-state/passport')}
-                            className="btn bg-white text-indigo-600 hover:bg-gray-50 px-8 py-3.5 text-base font-semibold shadow-lg"
+                            onClick={() => navigate('/apply/passport/state')}
+                            className="btn bg-white text-slate-900 hover:bg-slate-100 px-8 py-3.5 text-base font-bold shadow-lg"
                         >
-                            <Sparkles size={20} />
+                            <Zap size={20} className="text-amber-500" />
                             Start Free Now
                             <ArrowRight size={20} />
                         </button>
 
-                        <p className="text-sm text-indigo-200">No credit card • Free forever • 2 min setup</p>
+                        <p className="text-sm text-slate-400">Zero Trust Architecture • Configurable Modules</p>
                     </div>
                 </div>
             </section>

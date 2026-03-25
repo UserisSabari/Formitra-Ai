@@ -64,15 +64,15 @@ export default function ReviewPage() {
     }, [navigate, serviceId, decodedState]);
 
     const handleBack = () => {
-        // After reviewing, users should return to the document upload step
-        // where they can adjust or re-validate their supporting documents.
-        navigate(`/upload/${serviceId}/${encodeURIComponent(decodedState)}`);
+        // After reviewing, users should return to the Application Form step
+        // where they can edit the auto-filled data.
+        navigate(`/apply/${serviceId}/${encodeURIComponent(decodedState)}/form`);
     };
 
     const handleSubmit = () => {
         // Data is already synced via the zero-click useEffect hook!
         // Move directly to the Success page which guides the user.
-        navigate('/success');
+        navigate('/apply/success');
     };
 
     const personalFields = ['firstName', 'lastName', 'fatherName', 'email', 'mobile', 'dob', 'gender', 'maritalStatus'];

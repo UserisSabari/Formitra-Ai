@@ -24,14 +24,15 @@ createRoot(document.getElementById('root')).render(
           {/* Standalone mock portal (no Formitra layout shell) */}
           <Route path="/mock-portal" element={<MockPortalPage />} />
 
-          <Route element={<Layout />}>
+            <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/select-state/:serviceId" element={<SelectStatePage />} />
-            <Route path="/form/:serviceId/:state" element={<PassportFormPage />} />
-            <Route path="/upload/:serviceId/:state" element={<DocumentUploadPage />} />
-            <Route path="/review/:serviceId/:state" element={<ReviewPage />} />
-            <Route path="/success" element={<SuccessPage />} />
-            <Route path="/coming-soon/:serviceId" element={<ComingSoonPage />} />
+            <Route path="/dashboard" element={<HomePage />} />
+            <Route path="/apply/:serviceId/state" element={<SelectStatePage />} />
+            <Route path="/apply/:serviceId/:state/documents" element={<DocumentUploadPage />} />
+            <Route path="/apply/:serviceId/:state/form" element={<PassportFormPage />} />
+            <Route path="/apply/:serviceId/:state/review" element={<ReviewPage />} />
+            <Route path="/apply/success" element={<SuccessPage />} />
+            <Route path="/apply/:serviceId/coming-soon" element={<ComingSoonPage />} />
           </Route>
         </Routes>
       </Suspense>

@@ -14,7 +14,8 @@ export default function SelectStatePage() {
     );
 
     const handleStateSelect = (state) => {
-        navigate(`/form/${serviceId}/${encodeURIComponent(state)}`);
+        // Redirect to Document Upload first to enable Reverse AI Data Extraction
+        navigate(`/apply/${serviceId}/${encodeURIComponent(state)}/documents`);
     };
 
     return (

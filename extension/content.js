@@ -186,6 +186,11 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 // -------- Floating UX Control Widget --------
 
 function injectFloatingControlWidget() {
+    // Prevent widget from bleeding onto irrelevant websites (YouTube, Google, etc)
+    const activeDomain = window.location.hostname.toLowerCase();
+    const isApprovedDomain = ['gov.in', 'localhost', '127.0', 'vercel.app', 'formitra'].some(d => activeDomain.includes(d));
+    if (!isApprovedDomain) return;
+
     chrome.storage.local.get(['appData'], (result) => {
         if (!result.appData || !result.appData.data) return;
         

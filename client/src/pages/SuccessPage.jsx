@@ -69,7 +69,7 @@ export default function SuccessPage() {
         localStorage.removeItem('formitra_form_data');
         localStorage.removeItem('formitra_form_step');
         localStorage.removeItem(LOCAL_STORAGE_DOC_VALIDATION_KEY);
-        navigate('/');
+        navigate('/dashboard');
     };
 
     const handleSimulateExtensionInstall = () => {

@@ -123,6 +123,96 @@ Be intelligent and forgiving of minor layout or formatting differences (like "12
     return jsonResponse;
 }
 
+/**
+ * Extracts Applicant Data from provided documents using Gemini.
+ * @param {Array} files - Multer files array
+ * @returns {Object} Extracted JSON matching application schema
+ */
+async function extractDataFromDocuments(files) {
+    if (!process.env.GEMINI_API_KEY) {
+        const error = new Error('GEMINI_API_KEY is not configured in the environment.');
+        error.status = 500;
+        throw error;
+    }
+
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const geminiContent = [];
+
+    const prompt = `
+You are an expert OCR AI data extraction engine.
+You are provided with images of government IDs, documents, or forms.
+Your job is to read these documents and extract the user's details to pre-fill an application form.
+
+If the documents include an Aadhaar card, PAN card, or similarly structured ID, extract exactly what you see.
+If the document is a photo, you can infer gender or skip it.
+
+Return ONLY a perfectly structured JSON object matching the schema. If a field is not found in ANY document, leave it empty.
+For dates, try to format as YYYY-MM-DD if possible.
+`;
+    geminiContent.push(prompt);
+
+    for (const file of files) {
+        const isValidMime = file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf';
+        if (!isValidMime) continue;
+
+        let base64Data;
+        if (file.buffer) {
+            base64Data = file.buffer.toString("base64");
+        } else if (file.path) {
+            base64Data = fs.readFileSync(file.path, { encoding: 'base64' });
+        }
+
+        if (base64Data) {
+            geminiContent.push({
+                inlineData: {
+                    data: base64Data,
+                    mimeType: file.mimetype
+                }
+            });
+        }
+    }
+
+    const responseSchema = {
+        type: Type.OBJECT,
+        properties: {
+            success: {
+                type: Type.BOOLEAN,
+                description: "True if you successfully found at least some PII data."
+            },
+            data: {
+                type: Type.OBJECT,
+                properties: {
+                    firstName: { type: Type.STRING },
+                    lastName: { type: Type.STRING },
+                    fatherName: { type: Type.STRING },
+                    dob: { type: Type.STRING, description: "YYYY-MM-DD whenever possible" },
+                    gender: { type: Type.STRING, description: "Male, Female, or Transgender" },
+                    address: { type: Type.STRING },
+                    city: { type: Type.STRING },
+                    state: { type: Type.STRING },
+                    pincode: { type: Type.STRING }
+                }
+            }
+        },
+        required: ["success", "data"]
+    };
+
+    console.log(`[AI Service] Extracting data from ${files.length} documents...`);
+    
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: geminiContent,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: responseSchema,
+            temperature: 0.1
+        }
+    });
+
+    return JSON.parse(response.text);
+}
+
 module.exports = {
-    verifyDocuments
+    verifyDocuments,
+    extractDataFromDocuments
 };

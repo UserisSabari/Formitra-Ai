@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const { verifyDocuments } = require('../services/geminiService');
+const { verifyDocuments, extractDataFromDocuments } = require('../services/geminiService');
 
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -68,6 +68,42 @@ router.post('/verify-document', upload.array('documents', 10), async (req, res, 
             }
         }
         next(error); // Route errors to unified Express error handler
+    }
+});
+
+/**
+ * Route: POST /api/extract
+ * Expects form-data:
+ * - documents: Array of image/pdf files (e.g. Aadhaar, PAN)
+ */
+router.post('/extract', upload.array('documents', 5), async (req, res, next) => {
+    try {
+        if (!req.files || req.files.length === 0) {
+            const err = new Error('No documents provided for extraction.');
+            err.status = 400;
+            throw err;
+        }
+
+        // Delegate business logic to dedicated AI service
+        const extractedData = await extractDataFromDocuments(req.files);
+
+        // Professional Cleanup: Ensure temporary disk files are removed dynamically
+        for (const file of req.files) {
+            if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        }
+
+        return res.json({
+            ...extractedData,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        if (req.files) {
+            for (const file of req.files) {
+                if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+            }
+        }
+        next(error);
     }
 });
 

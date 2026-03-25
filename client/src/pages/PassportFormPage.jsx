@@ -83,16 +83,15 @@ export default function PassportFormPage() {
             return;
         }
 
-        // When all applicant data steps are complete, move to the
-        // dedicated Document Upload step before final review.
-        navigate(`/upload/${serviceId}/${encodeURIComponent(decodedState)}`);
+        // Move to Review application
+        navigate(`/apply/${serviceId}/${encodeURIComponent(decodedState)}/review`);
     };
 
     const handlePrev = () => {
         if (currentStep > 0) {
             setSearchParams({ step: (currentStep - 1).toString() });
         } else {
-            navigate(`/select-state/${serviceId}`);
+            navigate(`/apply/${serviceId}/${encodeURIComponent(decodedState)}/documents`);
         }
     };
 
@@ -113,7 +112,7 @@ export default function PassportFormPage() {
                         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors text-sm mb-4"
                     >
                         <ArrowLeft size={16} />
-                        {currentStep === 0 ? 'Back to State Selection' : 'Previous Step'}
+                        {currentStep === 0 ? 'Back to Documents' : 'Previous Step'}
                     </button>
 
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
