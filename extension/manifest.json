@@ -25,9 +25,7 @@
     "content_scripts": [
         {
             "matches": [
-                "*://*.passportindia.gov.in/*",
-                "http://localhost:5173/*",
-                "https://formitra-ai.vercel.app/*"
+                "<all_urls>"
             ],
             "js": [
                 "content.js"

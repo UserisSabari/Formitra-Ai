@@ -30,8 +30,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const service = request.service || 'passport';
         const files = request.files || [];
         
-        fillFormIntelligently(data, service, files);
+        // Acknowledge receipt immediately
         sendResponse({ status: "success", message: "Form filling initiated" });
+        
+        try {
+            // Initiate Full Automation Engine
+            window.sessionStorage.setItem('formitra_auto_mode', JSON.stringify({ data, service, files }));
+            runAutomationTick(data, service, files);
+        } catch (e) {
+            console.error("Formitra AI Injection Error:", e);
+        }
     }
 });
 
@@ -50,125 +58,118 @@ window.addEventListener("message", (event) => {
     }
 });
 
-// -------- Mock portal auto-run flow (localhost /mock-portal) --------
+// -------- Universal Automation Engine (Multi-Step & Single Page) --------
 
-function isMockPortalPage() {
-    const root = document.querySelector('[data-testid="mock-portal-root"]');
-    const step = document.querySelector('[data-testid="mock-step"]');
-    return !!(root && step);
+function checkAutomationBoot() {
+    const autoState = window.sessionStorage.getItem('formitra_auto_mode');
+    if (autoState) {
+        console.log("Formitra AI: Resuming full automation from session state...");
+        try {
+            const parsed = JSON.parse(autoState);
+            setTimeout(() => runAutomationTick(parsed.data, parsed.service, parsed.files), 500);
+        } catch(e) {}
+    }
 }
 
-function getMockPortalStep() {
-    const stepEl = document.querySelector('[data-testid="mock-step"]');
-    if (!stepEl) return 0;
-    const raw = stepEl.getAttribute('data-step');
-    const parsed = raw ? parseInt(raw, 10) : 0;
-    return Number.isNaN(parsed) ? 0 : parsed;
+async function runAutomationTick(data, service, files) {
+    if (!document.body) return;
+    console.log("Formitra AI: Running automation tick...");
+
+    // Fill the current visible fields
+    fillFormIntelligently(data, service, files, true);
+
+    // Backfill empty required fields with demo data to pass strict frontend validation
+    backfillDemoData();
+
+    // Give DOM time to react to injected events (e.g., React state updates)
+    await sleep(800);
+
+    // Attempt to locate navigational buttons based on generic text heuristics
+    const submitBtn = findNavigationButton(['submit', 'review', 'finish', 'complete']);
+    
+    // If we're on the final submission page, Stop the engine!
+    if (submitBtn) {
+        console.log("Formitra AI: Reached terminal/submit step. Halting Engine.");
+        window.sessionStorage.removeItem('formitra_auto_mode');
+        setTimeout(() => showNextStepsModal(), 500);
+        return;
+    }
+
+    const nextBtn = findNavigationButton(['next', 'continue', 'proceed', 'save & next']);
+    
+    if (nextBtn) {
+        console.log("Formitra AI: Auto-clicking Next button...");
+        
+        // SPA Observer: Watch for DOM mutations indicating a step change WITHOUT a hard reload
+        let changed = false;
+        const observer = new MutationObserver(() => {
+            changed = true;
+            observer.disconnect();
+            console.log("Formitra AI: SPA step transition detected.");
+            setTimeout(() => runAutomationTick(data, service, files), 800);
+        });
+        
+        // Start observing immediately before click
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        nextBtn.click();
+        
+        // Clean up observer if it's just a dead click
+        setTimeout(() => {
+            if (!changed) {
+                observer.disconnect();
+                console.log("Formitra AI: No DOM change after click. Engine waiting.");
+            }
+        }, 4000);
+        
+        // Note: If the click triggers a HARD redirect (page reload), the observer dies,
+        // but the engine will resurrect seamlessly on the next page via checkAutomationBoot()!
+    } else {
+        console.log("Formitra AI: No navigation buttons detected. Automation Engine Paused/Finished.");
+        window.sessionStorage.removeItem('formitra_auto_mode');
+        setTimeout(() => showNextStepsModal(), 500);
+    }
+}
+
+function findNavigationButton(keywords) {
+    // Specifically target our React Mock Portal buttons first for flawless demos
+    if (keywords.includes('next')) {
+        const mock = document.querySelector('[data-testid="mock-next"]');
+        if (mock && !mock.disabled) return mock;
+    }
+    if (keywords.includes('submit')) {
+        const mock = document.querySelector('[data-testid="mock-submit"]');
+        if (mock && !mock.disabled) return mock;
+    }
+
+    // Generic selector approach for wild government websites
+    const buttons = Array.from(document.querySelectorAll('button, input[type="button"], input[type="submit"], a.btn, a.button'));
+    for (const btn of buttons) {
+        if (btn.disabled) continue;
+        if (btn.offsetParent === null) continue; // Check if element is visually hidden
+        
+        const text = (btn.innerText || btn.value || btn.textContent || '').toLowerCase().trim();
+        // Avoid clicking structural buttons arbitrarily
+        if (!text || text.length > 30) continue; 
+
+        // Exact match or contains
+        if (keywords.some(k => text === k || text.startsWith(k) || text.endsWith(k))) {
+            return btn;
+        }
+    }
+    return null;
 }
 
 function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function waitForStepChange(previousStep, timeoutMs = 5000) {
-    const start = Date.now();
-    return new Promise((resolve) => {
-        const interval = setInterval(() => {
-            const current = getMockPortalStep();
-            if (current && current !== previousStep) {
-                clearInterval(interval);
-                resolve(true);
-                return;
-            }
-            if (Date.now() - start > timeoutMs) {
-                clearInterval(interval);
-                resolve(false);
-            }
-        }, 200);
-    });
-}
-
-async function runMockPortalFlow(appData) {
-    if (!appData || !appData.data) return;
-
-    const service = appData.service || "passport";
-    const data = appData.data;
-
-    console.log("Formitra AI: Starting mock portal auto-flow");
-
-    // Avoid running multiple times per page load
-    const autofillKey = "formitra_mock_portal_autofilled";
-    if (window.sessionStorage.getItem(autofillKey) === "true") {
-        console.log("Formitra AI: Mock portal already auto-filled in this session.");
-        return;
-    }
-    window.sessionStorage.setItem(autofillKey, "true");
-
-    // We will attempt a small finite number of steps
-    const maxSteps = 5;
-    let currentStep = getMockPortalStep() || 1;
-
-    for (let i = 0; i < maxSteps; i++) {
-        console.log(`Formitra AI: Filling mock portal step ${currentStep}`);
-        fillFormIntelligently(data, service, appData.files || []);
-        
-        // Backfill remaining empty required fields with demo values to enable the Next button
-        backfillDemoData();
-
-        await sleep(800);
-
-        const nextBtn = document.querySelector('[data-testid="mock-next"]');
-        if (!nextBtn || nextBtn.disabled) {
-            console.log("Formitra AI: No next button found or it is disabled, stopping auto-flow.");
-            break;
-        }
-
-        const beforeStep = getMockPortalStep() || currentStep;
-        nextBtn.click();
-        const changed = await waitForStepChange(beforeStep);
-
-        if (!changed) {
-            console.log("Formitra AI: Step did not change after clicking next, stopping.");
-            break;
-        }
-
-        currentStep = getMockPortalStep() || currentStep + 1;
-    }
-
-    // Try to submit at the end if a submit button exists
-    const submitBtn = document.querySelector('[data-testid="mock-submit"]');
-    if (submitBtn && !submitBtn.disabled) {
-        console.log("Formitra AI: Clicking mock portal submit button.");
-        submitBtn.click();
-    } else {
-        console.log("Formitra AI: No enabled submit button found at the end of flow.");
-    }
-}
-
-function maybeAutoRunOnMockPortal() {
-    if (!isMockPortalPage()) {
-        return;
-    }
-
-    chrome.storage.local.get(["appData"], (result) => {
-        const appData = result.appData;
-        if (!appData || !appData.data) {
-            console.log("Formitra AI: No appData in storage to auto-fill mock portal.");
-            return;
-        }
-
-        runMockPortalFlow(appData).catch((err) => {
-            console.error("Formitra AI: Error during mock portal auto-flow", err);
-        });
-    });
-}
-
-// Try auto-run once the DOM is ready on mock portal
+// Global Engine Boot Listener
 if (document.readyState === "complete" || document.readyState === "interactive") {
-    setTimeout(maybeAutoRunOnMockPortal, 800);
+    setTimeout(checkAutomationBoot, 600);
 } else {
     document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(maybeAutoRunOnMockPortal, 800);
+        setTimeout(checkAutomationBoot, 600);
     });
 }
 
@@ -177,14 +178,15 @@ if (document.readyState === "complete" || document.readyState === "interactive")
  * @param {Object} data - Form data to fill
  * @param {String} service - Service type (e.g., 'passport')
  * @param {Array} files - Array of attached file objects
+ * @param {Boolean} isAutoMode - Whether running under the automation engine
  */
-function fillFormIntelligently(data, service, files = []) {
+function fillFormIntelligently(data, service, files = [], isAutoMode = false) {
     console.log(`Formitra AI: Starting intelligent form fill for ${service}`);
     
     // Show top-right visual feedback
     const toast = document.createElement('div');
     toast.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Formitra AI is bridging data...`;
-    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #0f172a; color: white; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: sans-serif; z-index: 99999; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; transition: opacity 0.3s;';
+    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #0f172a; color: white; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: sans-serif; z-index: 99999; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; transition: opacity 0.3s; pointer-events: none;';
     const styleBlock = document.createElement('style');
     styleBlock.innerHTML = '@keyframes spin { 100% { transform: rotate(360deg); } }';
     document.head.appendChild(styleBlock);
@@ -242,9 +244,11 @@ function fillFormIntelligently(data, service, files = []) {
         }
     }
 
-    setTimeout(() => {
-        showNextStepsModal();
-    }, 1500);
+    if (!isAutoMode) {
+        setTimeout(() => {
+            showNextStepsModal();
+        }, 1500);
+    }
 }
 
 /**
