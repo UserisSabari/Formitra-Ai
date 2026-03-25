@@ -22,6 +22,15 @@
     "background": {
         "service_worker": "background.js"
     },
+    "commands": {
+        "trigger-autofill": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+F",
+                "mac": "Command+Shift+F"
+            },
+            "description": "Start Formitra AI Auto-Fill"
+        }
+    },
     "content_scripts": [
         {
             "matches": [

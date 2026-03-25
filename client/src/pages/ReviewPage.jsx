@@ -14,14 +14,18 @@ export default function ReviewPage() {
 
     useEffect(() => {
         const savedForm = localStorage.getItem('formitra_form_data');
+        let parsedFormData = {};
         if (savedForm) {
             try {
-                setFormData(JSON.parse(savedForm));
+                parsedFormData = JSON.parse(savedForm);
+                setFormData(parsedFormData);
             } catch {
                 navigate('/');
+                return;
             }
         } else {
             navigate('/');
+            return;
         }
 
         const savedValidation = localStorage.getItem(LOCAL_STORAGE_DOC_VALIDATION_KEY);
@@ -33,7 +37,31 @@ export default function ReviewPage() {
                 setDocValidation(null);
             }
         }
-    }, [navigate]);
+
+        // Zero-Click Auto-Sync to Extension
+        let files = [];
+        try {
+            const raw = localStorage.getItem('formitra_files');
+            if (raw) files = JSON.parse(raw);
+        } catch(e) {}
+
+        const payload = {
+            service: serviceId,
+            state: decodedState,
+            data: parsedFormData,
+            files: files
+        };
+
+        // Broadcast to extension content script immediately
+        window.postMessage({
+            type: 'FORMITRA_SAVE_DATA',
+            payload: payload
+        }, '*');
+
+        // Also save to standard localStorage for the popup to read if content.js messaging missed it
+        localStorage.setItem('formitra_app_data', JSON.stringify(payload));
+        
+    }, [navigate, serviceId, decodedState]);
 
     const handleBack = () => {
         // After reviewing, users should return to the document upload step
@@ -42,35 +70,8 @@ export default function ReviewPage() {
     };
 
     const handleSubmit = () => {
-        // Send data to extension
-        let files = [];
-        try {
-            const raw = localStorage.getItem('formitra_files');
-            if (raw) files = JSON.parse(raw);
-        } catch(e) {}
-
-        if (window.chrome?.runtime) {
-            window.postMessage({
-                type: 'FORMITRA_SAVE_DATA',
-                payload: {
-                    service: serviceId,
-                    state: decodedState,
-                    data: formData,
-                    files: files
-                }
-            }, '*');
-        }
-
-        // Store in localStorage as backup
-        localStorage.setItem('formitra_app_data', JSON.stringify({
-            service: serviceId,
-            state: decodedState,
-            data: formData,
-            files: files
-        }));
-
-        // After saving, move to the Success page which guides
-        // the user through next steps (including extension setup).
+        // Data is already synced via the zero-click useEffect hook!
+        // Move directly to the Success page which guides the user.
         navigate('/success');
     };
 

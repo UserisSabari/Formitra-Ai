@@ -118,16 +118,20 @@ async function runAutomationTick(data, service, files) {
         setTimeout(() => {
             if (!changed) {
                 observer.disconnect();
-                console.log("Formitra AI: No DOM change after click. Engine waiting.");
+                console.log("Formitra AI: No DOM change after click. Engine waiting/Paused.");
+                window.sessionStorage.removeItem('formitra_auto_mode');
+                window.sessionStorage.setItem('formitra_engine_paused', 'true');
+                refreshFloatingWidget({data, service, files});
             }
         }, 4000);
         
         // Note: If the click triggers a HARD redirect (page reload), the observer dies,
         // but the engine will resurrect seamlessly on the next page via checkAutomationBoot()!
     } else {
-        console.log("Formitra AI: No navigation buttons detected. Automation Engine Paused/Finished.");
+        console.log("Formitra AI: No navigation buttons detected. Engine Paused (Captcha/Manual).");
         window.sessionStorage.removeItem('formitra_auto_mode');
-        setTimeout(() => showNextStepsModal(), 500);
+        window.sessionStorage.setItem('formitra_engine_paused', 'true');
+        refreshFloatingWidget({data, service, files});
     }
 }
 
@@ -166,11 +170,114 @@ function sleep(ms) {
 
 // Global Engine Boot Listener
 if (document.readyState === "complete" || document.readyState === "interactive") {
-    setTimeout(checkAutomationBoot, 600);
+    setTimeout(() => {
+        checkAutomationBoot();
+        injectFloatingControlWidget();
+    }, 600);
 } else {
     document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(checkAutomationBoot, 600);
+        setTimeout(() => {
+            checkAutomationBoot();
+            injectFloatingControlWidget();
+        }, 600);
     });
+}
+
+// -------- Floating UX Control Widget --------
+
+function injectFloatingControlWidget() {
+    chrome.storage.local.get(['appData'], (result) => {
+        if (!result.appData || !result.appData.data) return;
+        
+        if (document.getElementById('formitra-floating-widget')) return;
+
+        const widget = document.createElement('div');
+        widget.id = 'formitra-floating-widget';
+        widget.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #0f172a;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);
+            z-index: 2147483647; /* max z-index */
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            border: 1px solid rgba(255,255,255,0.1);
+        `;
+
+        // Keyframes for animations
+        if (!document.getElementById('fm-keyframes')) {
+            const style = document.createElement('style');
+            style.id = 'fm-keyframes';
+            style.innerHTML = '@keyframes fm-pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }';
+            document.head.appendChild(style);
+        }
+
+        document.body.appendChild(widget);
+        updateWidgetState(widget, result.appData);
+    });
+}
+
+function refreshFloatingWidget(fallbackAppData) {
+    chrome.storage.local.get(['appData'], (result) => {
+        const dataToUse = (result.appData && result.appData.data) ? result.appData : fallbackAppData;
+        const widget = document.getElementById('formitra-floating-widget');
+        if (widget && dataToUse) {
+            updateWidgetState(widget, dataToUse);
+        } else if (!widget && dataToUse) {
+            injectFloatingControlWidget();
+        }
+    });
+}
+
+function updateWidgetState(widgetEl, appData) {
+    const isRunning = !!window.sessionStorage.getItem('formitra_auto_mode');
+    const isPaused = !!window.sessionStorage.getItem('formitra_engine_paused');
+
+    if (isRunning) {
+        widgetEl.innerHTML = `
+            <div style="width:10px; height:10px; border-radius:50%; background:#22c55e; animation: fm-pulse 1.5s infinite;"></div>
+            <span style="font-weight:600; font-size:14px; letter-spacing:0.3px;">Engine Running</span>
+            <button id="fm-widget-pause" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:white; padding:4px 10px; border-radius:6px; cursor:pointer; font-size:12px; margin-left:4px; font-weight:600;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">Stop</button>
+        `;
+        widgetEl.querySelector('#fm-widget-pause').addEventListener('click', () => {
+             window.sessionStorage.removeItem('formitra_auto_mode');
+             updateWidgetState(widgetEl, appData);
+        });
+    } else if (isPaused) {
+        // Paused state (awaiting Captcha etc)
+        widgetEl.innerHTML = `
+            <div style="width:10px; height:10px; border-radius:50%; background:#f59e0b;"></div>
+            <span style="font-weight:600; font-size:14px; color:#fcd34d;">Paused (Await Captcha)</span>
+            <button id="fm-widget-resume" style="background:#2563eb; border:none; color:white; padding:5px 12px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px; box-shadow:0 2px 4px rgba(37,99,235,0.4);" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">Resume</button>
+        `;
+        widgetEl.querySelector('#fm-widget-resume').addEventListener('click', () => {
+             window.sessionStorage.removeItem('formitra_engine_paused');
+             window.sessionStorage.setItem('formitra_auto_mode', JSON.stringify(appData));
+             updateWidgetState(widgetEl, appData);
+             runAutomationTick(appData.data, appData.service, appData.files);
+        });
+    } else {
+        // Idle state
+        widgetEl.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span style="font-weight:600; font-size:14px;">Formitra Ready</span>
+            <button id="fm-widget-start" style="background:#2563eb; border:none; color:white; padding:5px 12px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:12px; box-shadow:0 2px 4px rgba(37,99,235,0.4);" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">▶ Auto-Fill</button>
+        `;
+        widgetEl.querySelector('#fm-widget-start').addEventListener('click', () => {
+             window.sessionStorage.removeItem('formitra_engine_paused');
+             window.sessionStorage.setItem('formitra_auto_mode', JSON.stringify(appData));
+             updateWidgetState(widgetEl, appData);
+             runAutomationTick(appData.data, appData.service, appData.files);
+        });
+    }
 }
 
 /**
@@ -305,6 +412,17 @@ function fillFileInput(input, fileObj) {
         dt.items.add(file);
         input.files = dt.files;
         input.classList.add('formitra-filled');
+        
+        // Visual Field Highlighting
+        const originalBg = input.style.backgroundColor;
+        const originalTransition = input.style.transition;
+        input.style.transition = 'background-color 0.4s ease';
+        input.style.backgroundColor = '#dcfce3'; // Emerald 100
+        setTimeout(() => {
+            input.style.backgroundColor = originalBg;
+            setTimeout(() => { input.style.transition = originalTransition; }, 400);
+        }, 800);
+
         input.dispatchEvent(new Event('change', { bubbles: true }));
         console.log(`Formitra AI: ✓ Attached ${fileObj.name} to file input`);
     } catch (e) {
@@ -366,6 +484,16 @@ function fillElement(element, value, fieldName) {
 
     // Mark element as filled
     element.classList.add('formitra-filled');
+
+    // Visual Field Highlighting
+    const originalBg = element.style.backgroundColor;
+    const originalTransition = element.style.transition;
+    element.style.transition = 'background-color 0.4s ease';
+    element.style.backgroundColor = '#dcfce3'; // Emerald 100
+    setTimeout(() => {
+        element.style.backgroundColor = originalBg;
+        setTimeout(() => { element.style.transition = originalTransition; }, 400);
+    }, 800);
 
     // Trigger change events for framework compatibility
     element.dispatchEvent(new Event('input', { bubbles: true }));

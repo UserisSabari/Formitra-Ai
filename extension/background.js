@@ -39,3 +39,35 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     return false;
 });
+
+// Listen for global keyboard shortcuts
+chrome.commands.onCommand.addListener((command) => {
+    if (command === "trigger-autofill") {
+        console.log("Formitra AI: Keyboard shortcut triggered!");
+        chrome.storage.local.get(['appData'], (result) => {
+            const appData = result.appData;
+            if (!appData || !appData.data) {
+                console.log("Formitra AI: No data to auto-fill.");
+                return;
+            }
+
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs.length === 0) return;
+                
+                // Send standard message to content script
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    action: "FILL_FORM",
+                    data: appData.data,
+                    service: appData.service,
+                    files: appData.files || []
+                }, (response) => {
+                    if (chrome.runtime.lastError) {
+                        console.error('Error:', chrome.runtime.lastError);
+                    } else {
+                        console.log('Form filling started via shortcut', response);
+                    }
+                });
+            });
+        });
+    }
+});
