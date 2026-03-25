@@ -19,10 +19,14 @@ export default function Layout() {
 
     const isHome = location.pathname === '/';
 
-    const handleReset = () => {
-        localStorage.removeItem('formitra_form_data');
-        localStorage.removeItem('formitra_form_step');
-        navigate('/');
+    const handleAction = () => {
+        if (isHome) {
+            document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            localStorage.removeItem('formitra_form_data');
+            localStorage.removeItem('formitra_form_step');
+            navigate('/');
+        }
     };
 
     return (
@@ -73,11 +77,11 @@ export default function Layout() {
 
                         {/* Action Button */}
                         <button
-                            onClick={handleReset}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            onClick={handleAction}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                                 isHome 
-                                    ? 'btn-primary' 
-                                    : 'btn-ghost'
+                                    ? 'btn-primary shadow-soft' 
+                                    : 'btn-secondary text-gray-700 hover:bg-gray-100'
                             }`}
                         >
                             {isHome ? 'Get Started' : 'New Form'}

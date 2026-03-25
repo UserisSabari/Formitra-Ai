@@ -1,329 +1,195 @@
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-    FileText, Shield, Car, Baby, Wallet, Home,
-    ArrowRight, Zap, Lock, CheckCircle2, Sparkles, Clock, TrendingUp
+import { 
+    Sparkles, ArrowRight, Shield, Cpu, Zap, Brain, CheckCircle, Settings,
+    FileText, Home, Car, Handshake, Landmark, FileSearch, Wand2,
+    Clock, ListChecks, CheckCircle2
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const services = [
-    { 
-        id: 'passport', 
-        name: 'Passport Services', 
-        icon: Shield, 
-        color: 'mono',
-        time: '3 min', 
-        status: 'live',
-        description: 'Apply for new passport or renewal'
-    },
-    { 
-        id: 'income', 
-        name: 'Income Certificate', 
-        icon: FileText, 
-        color: 'mono',
-        time: '2 min', 
-        status: 'soon',
-        description: 'Get your income certificate online'
-    },
-    { 
-        id: 'domicile', 
-        name: 'Domicile Certificate', 
-        icon: Home, 
-        color: 'mono',
-        time: '2 min', 
-        status: 'soon',
-        description: 'Apply for domicile certificate'
-    },
-    { 
-        id: 'driving', 
-        name: 'Driving License', 
-        icon: Car, 
-        color: 'mono',
-        time: '4 min', 
-        status: 'soon',
-        description: 'New license or renewal'
-    },
-    { 
-        id: 'ration', 
-        name: 'Ration Card', 
-        icon: Wallet, 
-        color: 'mono',
-        time: '3 min', 
-        status: 'soon',
-        description: 'Apply for ration card'
-    },
-    { 
-        id: 'birth', 
-        name: 'Birth Certificate', 
-        icon: Baby, 
-        color: 'mono',
-        time: '3 min', 
-        status: 'soon',
-        description: 'Get birth certificate online'
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+        opacity: 1, 
+        transition: { staggerChildren: 0.1, delayChildren: 0.1 }
     }
-];
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { type: "tween", ease: "easeOut", duration: 0.5 } }
+};
 
 export default function HomePage() {
-    const navigate = useNavigate();
+    const [scrolled, setScrolled] = useState(false);
 
-    const handleServiceSelect = (service) => {
-        if (service.status === 'soon') {
-            navigate(`/apply/${service.id}/coming-soon`);
-        } else {
-            navigate(`/apply/${service.id}/state`);
-        }
-    };
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const services = [
+        { id: "passport", title: "Passport Services", desc: "Apply for new passport or renewal.", time: "~3 min", icon: <Shield size={24}/>, active: true },
+        { id: "income", title: "Income Certificate", desc: "Get your income certificate online.", time: "~2 min", icon: <FileText size={24}/>, active: false },
+        { id: "domicile", title: "Domicile Certificate", desc: "Apply for domicile certificate.", time: "~2 min", icon: <Home size={24}/>, active: false },
+        { id: "vehicle", title: "Vehicle Registration", desc: "Register new vehicle or transfer ownership.", time: "~4 min", icon: <Car size={24}/>, active: true },
+        { id: "business", title: "Business License", desc: "Apply for new business permits.", time: "~5 min", icon: <Handshake size={24}/>, active: true },
+        { id: "property", title: "Property Tax Payment", desc: "Pay your property taxes securely.", time: "~2 min", icon: <Landmark size={24}/>, active: true },
+    ];
 
     return (
-        <div className="space-y-20 pb-16">
+        <div className="min-h-screen bg-[#fafbfc] text-[#334155] font-sans selection:bg-blue-100 selection:text-blue-900 pb-20">
             {/* Hero Section */}
-            <section className="container pt-12 lg:pt-20">
-                <div className="max-w-4xl mx-auto text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="space-y-8"
+            <section className="relative pt-20 pb-20 lg:pt-32 lg:pb-32 overflow-hidden bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] min-h-[600px] flex flex-col justify-center">
+                {/* Soft decorative background elements matching image */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#e0e7ff] rounded-full blur-[100px] opacity-70 -translate-y-1/2 translate-x-1/4 z-0"></div>
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#f1f5f9] rounded-[3rem] rotate-45 blur-md opacity-80 translate-y-1/3 -translate-x-[40%] z-0 shadow-[inset_0_0_50px_rgba(0,0,0,0.05),0_0_50px_rgba(255,255,255,0.5)] border border-white"></div>
+                <div className="absolute top-[40%] right-0 w-[500px] h-[700px] bg-[#e2e8f0]/40 rounded-[3rem] blur-xl opacity-80 translate-x-[40%] -translate-y-1/2 z-0 border border-white shadow-[0_0_50px_rgba(255,255,255,0.5)]"></div>
+
+                {/* Floating outline icons matching image exactly */}
+                <div className="absolute top-[20%] left-[15%] text-slate-400 opacity-60"><Cpu size={56} strokeWidth={1} /></div>
+                <div className="absolute top-[15%] right-[20%] text-slate-400 opacity-60"><CheckCircle size={40} strokeWidth={1} /></div>
+                <div className="absolute top-[25%] right-[10%] text-slate-400 opacity-60 flex flex-col"><FileText size={56} strokeWidth={1} /><span className="absolute bottom-1 right-1 text-slate-400 opacity-60"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span></div>
+                <div className="absolute top-[45%] right-[15%] text-slate-400 opacity-60"><Brain size={56} strokeWidth={1} /></div>
+                <div className="absolute bottom-[20%] left-[10%] text-slate-400 opacity-60"><Shield size={56} strokeWidth={1} /></div>
+                <div className="absolute bottom-[25%] left-[20%] text-slate-400 opacity-60"><Settings size={56} strokeWidth={1} /></div>
+                <div className="absolute bottom-[10%] left-[30%] text-slate-400 opacity-60"><CheckCircle size={40} strokeWidth={1} /></div>
+                <div className="absolute top-[35%] right-[25%] text-slate-400 opacity-60"><Zap size={48} strokeWidth={1} /></div>
+
+                <div className="container max-w-5xl relative z-10 mx-auto px-4 mt-8">
+                    <motion.div 
+                        variants={containerVariants} initial="hidden" animate="visible"
+                        className="text-center flex flex-col items-center"
                     >
-                        {/* Badge */}
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-100 border border-zinc-200 rounded-md shadow-sm">
-                            <span className="text-xs font-bold text-zinc-800 tracking-wide uppercase">Enterprise AI Engine</span>
-                        </div>
-
-                        {/* Main Heading */}
-                        <div className="space-y-4">
-                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
-                                Government Forms
-                                <br />
-                                <span className="text-gradient">Made Simple</span>
-                            </h1>
-                            <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                                Complete any government form in <span className="font-semibold text-gray-900">under 3 minutes</span> with our intelligent assistant. Fast, accurate, and hassle-free.
-                            </p>
-                        </div>
-
-                        {/* CTA Buttons */}
-                        <div className="flex flex-wrap justify-center gap-4 pt-4">
-                            <button
-                                onClick={() => navigate('/apply/passport/state')}
-                                className="btn-primary text-base px-8 py-3.5"
-                            >
-                                <Sparkles size={20} />
-                                Start Free Application
-                                <ArrowRight size={20} />
-                            </button>
-                            <button className="btn-secondary text-base px-8 py-3.5">
+                        <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#0f172a] mb-6 leading-[1.15]">
+                            Government Forms<br />
+                            Made Simple
+                        </motion.h1>
+                        <motion.p variants={itemVariants} className="text-lg md:text-xl text-slate-600 font-medium max-w-2xl mx-auto mb-10 leading-relaxed text-balance">
+                            Complete any government form in <strong className="text-slate-800">under 3 minutes</strong> with our intelligent assistant. Fast, accurate, and hassle-free.
+                        </motion.p>
+                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <a href="#services" className="btn btn-primary flex items-center gap-2 text-base px-8 py-3.5 w-full sm:w-auto shadow-lg shadow-blue-500/20 rounded-md">
+                                <Sparkles size={18} /> Start Free Application <ArrowRight size={16} />
+                            </a>
+                            <a href="#how" className="btn btn-secondary text-base px-8 py-3.5 w-full sm:w-auto rounded-md">
                                 Learn More
-                            </button>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto pt-12">
-                            {[
-                                { value: 'Free Forever', label: 'Users', icon: TrendingUp },
-                                { value: '85%', label: 'Time Saved', icon: Zap },
-                                { value: '99.9%', label: 'Accuracy', icon: CheckCircle2 }
-                            ].map((stat, i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 0.3 + i * 0.1 }}
-                                    className="card p-6 text-center border-zinc-200"
-                                >
-                                    <div className="w-10 h-10 rounded border border-zinc-200 bg-zinc-50 flex items-center justify-center mx-auto mb-3">
-                                        <stat.icon className="w-5 h-5 text-black" />
-                                    </div>
-                                    <div className="text-2xl font-bold text-black mb-1 tracking-tight">{stat.value}</div>
-                                    <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{stat.label}</div>
-                                </motion.div>
-                            ))}
-                        </div>
+                            </a>
+                        </motion.div>
                     </motion.div>
                 </div>
             </section>
 
-            {/* Services Grid */}
-            <section className="container">
-                <div className="text-center mb-12">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-200 rounded-md mb-4">
-                        <Shield className="text-slate-700" size={16} />
-                        <span className="text-sm font-semibold text-slate-700">Available Integrations</span>
+            {/* Our Services */}
+            <section id="services" className="py-24 bg-white">
+                <div className="container max-w-6xl">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">Our Services</h2>
+                        <p className="text-lg text-slate-500">Select any service to get started instantly.</p>
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Choose Your Service</h2>
-                    <p className="text-lg text-gray-600">Select any service to get started instantly</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {services.map((service, index) => {
-                        const ServiceIcon = service.icon;
-                        return (
-                            <motion.div
-                                key={service.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
-                                onClick={() => handleServiceSelect(service)}
-                                className="service-card group"
-                            >
-                                {/* Status Badge */}
-                                {service.status === 'live' && (
-                                    <div className="absolute top-4 right-4">
-                                        <span className="badge-success text-xs">Live</span>
-                                    </div>
-                                )}
-
-                                {/* Icon */}
-                                <div className={`w-12 h-12 rounded border border-zinc-200 bg-zinc-50 flex items-center justify-center mb-5`}>
-                                    <ServiceIcon size={20} className="text-black" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {services.map((service, i) => (
+                            <div key={i} className="pro-card p-8 flex flex-col h-full group hover:border-purple-200 transition-colors">
+                                <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-6">
+                                    {service.icon}
                                 </div>
-
-                                {/* Content */}
-                                <div>
-                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{service.name}</h3>
-                                    <p className="text-sm text-gray-600 mb-4">{service.description}</p>
-
-                                    {/* Time Badge */}
-                                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                                        <Clock size={14} />
-                                        <span>~{service.time}</span>
-                                    </div>
-
-                                    {/* Coming Soon */}
-                                    {service.status === 'soon' && (
-                                        <div className="mt-4">
-                                            <span className="badge-warning text-xs">Coming Soon</span>
-                                        </div>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">{service.title}</h3>
+                                <p className="text-slate-500 text-sm mb-6 flex-grow leading-relaxed">{service.desc}</p>
+                                <div className="flex items-center justify-between mt-auto">
+                                    <span className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
+                                        <Clock size={14} /> {service.time}
+                                    </span>
+                                    {service.active ? (
+                                        <Link to={`/apply/${service.id}/state`} className="text-[#1978E5] font-semibold text-sm flex items-center gap-1 hover:text-[#1461bd] transition-colors">
+                                            Configure Module <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform"/>
+                                        </Link>
+                                    ) : (
+                                        <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-semibold">
+                                            Coming Soon
+                                        </span>
                                     )}
-
-                                    {/* Arrow */}
-                                    <div className="mt-6 flex items-center gap-2 text-slate-800 font-semibold text-sm">
-                                        Configure Module
-                                        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                                    </div>
                                 </div>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-            </section>
-
-            {/* How it Works */}
-            <section className="container">
-                <div className="card p-8 md:p-12 bg-slate-50 border-slate-200">
-                    <div className="text-center mb-12">
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">How It Works</h2>
-                        <p className="text-lg text-gray-600">Three simple steps to complete your application</p>
-                    </div>
-
-                    <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                        {[
-                            { 
-                                num: '1', 
-                                title: 'Select Service', 
-                                desc: 'Choose from 6+ government services', 
-                                icon: FileText, 
-                                color: 'indigo' 
-                            },
-                            { 
-                                num: '2', 
-                                title: 'Fill Smart Form', 
-                                desc: 'AI helps you complete faster', 
-                                icon: Sparkles, 
-                                color: 'purple' 
-                            },
-                            { 
-                                num: '3', 
-                                title: 'Auto Submit', 
-                                desc: 'We handle the submission', 
-                                icon: Zap, 
-                                color: 'pink' 
-                            }
-                        ].map((step, i) => {
-                            const StepIcon = step.icon;
-                            return (
-                                <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: i * 0.15 }}
-                                    className="text-center"
-                                >
-                                    {/* Number Badge */}
-                                    <div className="relative inline-block mb-6">
-                                        <div className={`w-16 h-16 rounded bg-zinc-50 text-black flex items-center justify-center border border-zinc-200 shadow-sm`}>
-                                            <StepIcon size={28} />
-                                        </div>
-                                        <div className="absolute -top-2 -right-2 w-8 h-8 rounded bg-black flex items-center justify-center shadow-sm">
-                                            <span className="text-sm font-bold text-white">{step.num}</span>
-                                        </div>
-                                    </div>
-
-                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{step.title}</h3>
-                                    <p className="text-gray-600">{step.desc}</p>
-                                </motion.div>
-                            );
-                        })}
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* Features */}
-            <section className="container">
-                <div className="text-center mb-12">
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Why Choose Us?</h2>
-                    <p className="text-lg text-gray-600">Everything you need for hassle-free forms</p>
-                </div>
+            {/* How It Works */}
+            <section id="how" className="py-24 bg-[#fafbfc]">
+                <div className="container max-w-5xl">
+                    <div className="text-center mb-20">
+                        <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">How It Works</h2>
+                        <p className="text-lg text-slate-500">Three simple steps to complete your application</p>
+                    </div>
+                    <div className="flex flex-col md:flex-row justify-between items-center relative gap-12 md:gap-0 max-w-4xl mx-auto">
+                        {/* Connecting Line */}
+                        <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[1px] bg-slate-200 z-0"></div>
+                        
+                        {/* Step 1 */}
+                        <div className="flex flex-col items-center text-center relative z-10 w-full md:w-1/3">
+                            <div className="w-24 h-24 rounded-full bg-white border border-blue-600 text-blue-600 flex items-center justify-center mb-6 relative">
+                                <FileSearch size={32} strokeWidth={1.5} />
+                                <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-[#fafbfc]">1</div>
+                            </div>
+                            <h4 className="text-lg font-bold text-slate-900 mb-2">Select Service</h4>
+                            <p className="text-slate-500 text-sm px-4">Choose from 6+ standardized government services</p>
+                        </div>
+                        
+                        {/* Step 2 */}
+                        <div className="flex flex-col items-center text-center relative z-10 w-full md:w-1/3">
+                            <div className="w-24 h-24 rounded-full bg-white border border-blue-600 text-blue-600 flex items-center justify-center mb-6 relative">
+                                <Wand2 size={32} strokeWidth={1.5} />
+                                <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-[#fafbfc]">2</div>
+                            </div>
+                            <h4 className="text-lg font-bold text-slate-900 mb-2">Fill Smart Form</h4>
+                            <p className="text-slate-500 text-sm px-4">AI helps you complete forms faster and flawlessly</p>
+                        </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {[
-                        { icon: Zap, title: 'Lightning Fast', desc: 'Process applications instantly', color: 'amber' },
-                        { icon: Lock, title: '100% Secure', desc: 'Local memory execution', color: 'emerald' },
-                        { icon: Shield, title: 'Compliant', desc: 'Auto-adapts to regulations', color: 'slate' },
-                        { icon: CheckCircle2, title: 'Zero Errors', desc: 'Pre-validated pipelines', color: 'slate' }
-                    ].map((feature, i) => {
-                        const FeatureIcon = feature.icon;
-                        return (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                                className="card p-6 text-center border-zinc-200"
-                            >
-                                <div className={`w-12 h-12 rounded bg-zinc-50 flex items-center justify-center mx-auto mb-4 border border-zinc-200`}>
-                                    <FeatureIcon size={20} className="text-black" />
-                                </div>
-                                <h4 className="text-lg font-bold text-black mb-2">{feature.title}</h4>
-                                <p className="text-sm text-zinc-600">{feature.desc}</p>
-                            </motion.div>
-                        );
-                    })}
+                        {/* Step 3 */}
+                        <div className="flex flex-col items-center text-center relative z-10 w-full md:w-1/3">
+                            <div className="w-24 h-24 rounded-full bg-white border border-blue-600 text-blue-600 flex items-center justify-center mb-6 relative">
+                                <Zap size={32} strokeWidth={1.5} />
+                                <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-[#fafbfc]">3</div>
+                            </div>
+                            <h4 className="text-lg font-bold text-slate-900 mb-2">Auto Submit</h4>
+                            <p className="text-slate-500 text-sm px-4">We securely handle the final submission</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            {/* CTA */}
-            <section className="container">
-                <div className="card p-12 md:p-16 text-center bg-black border-black text-white rounded">
-                    <div className="max-w-2xl mx-auto space-y-6">
-                        <Shield className="w-12 h-12 mx-auto text-white" />
-                        <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Ready to Deploy?</h2>
-                        <p className="text-xl text-zinc-400">
-                            Join the <span className="font-semibold text-white">enterprise teams</span> accelerating their regulatory pipelines.
-                        </p>
-
-                        <button
-                            onClick={() => navigate('/apply/passport/state')}
-                            className="btn bg-white text-black hover:bg-zinc-200 px-8 py-3.5 text-sm font-bold shadow-soft"
-                        >
-                            <Zap size={18} className="text-black" />
-                            Start Free Now
-                            <ArrowRight size={18} />
-                        </button>
-
-                        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Zero Trust Architecture • Configurable Modules</p>
+            {/* Why Choose Us */}
+            <section className="py-24 bg-[#fafbfc] border-t border-slate-100">
+                <div className="container max-w-6xl">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">Why Choose Us?</h2>
+                        <p className="text-lg text-slate-500">Everything you need for hassle-free forms</p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="pro-card p-8 flex flex-col items-center text-center">
+                            <Clock size={32} className="text-slate-700 mb-5" strokeWidth={1.5} />
+                            <h4 className="font-bold text-slate-900 text-lg mb-2">Lightning Fast</h4>
+                            <p className="text-slate-500 text-sm">Process highly complex applications instantly.</p>
+                        </div>
+                        <div className="pro-card p-8 flex flex-col items-center text-center">
+                            <Shield size={32} className="text-slate-700 mb-5" strokeWidth={1.5} />
+                            <h4 className="font-bold text-slate-900 text-lg mb-2">100% Secure</h4>
+                            <p className="text-slate-500 text-sm">Strict local memory execution. Zero leaks.</p>
+                        </div>
+                        <div className="pro-card p-8 flex flex-col items-center text-center">
+                            <CheckCircle2 size={32} className="text-slate-700 mb-5" strokeWidth={1.5} />
+                            <h4 className="font-bold text-slate-900 text-lg mb-2">Compliant</h4>
+                            <p className="text-slate-500 text-sm">Auto-adapts and maps to rigid regulations.</p>
+                        </div>
+                        <div className="pro-card p-8 flex flex-col items-center text-center">
+                            <ListChecks size={32} className="text-slate-700 mb-5" strokeWidth={1.5} />
+                            <h4 className="font-bold text-slate-900 text-lg mb-2">Zero Errors</h4>
+                            <p className="text-slate-500 text-sm">Pre-validated pipelines reject any human error.</p>
+                        </div>
                     </div>
                 </div>
             </section>
