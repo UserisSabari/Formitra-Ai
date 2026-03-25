@@ -2,9 +2,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0f172a; /* Slate 900 */
-  --color-primary-dark: #1e293b; /* Slate 800 */
-  --color-primary-light: #334155; /* Slate 700 */
+  --color-primary: #000000; /* Pure Black */
+  --color-primary-dark: #111111; /* Off-Black */
+  --color-primary-light: #333333; /* Dark Gray */
   --color-success: #10b981;
   --color-warning: #fbbf24;
   --color-error: #ef4444;
@@ -31,19 +31,21 @@ h1, h2, h3, h4, h5, h6 {
 /* Card Styles */
 .card {
   background-color: white;
-  border-radius: 0.25rem; /* Sharper edges */
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-  border: 1px solid rgb(229 231 235);
+  border-radius: 6px; /* Stripe-like sharp radius */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02), 0 0 0 1px rgba(0,0,0,0.03);
+  border: 1px solid #eaeaea;
 }
 
 .card-hover {
-  transition-property: all;
-  transition-duration: 200ms;
+  transition-property: transform, box-shadow, border-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in-out;
 }
 
 .card-hover:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border-color: rgb(209 213 219);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0,0,0,0.03);
+  border-color: #d4d4d8; /* zinc-300 */
 }
 
 /* Button Styles */
@@ -52,18 +54,18 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem; /* Sharper edges */
-  font-weight: 600; /* Bolder text for enterprise */
-  transition-property: all;
-  transition-duration: 200ms;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500; /* Cleaner typography */
+  font-size: 0.875rem; /* 14px */
+  transition-property: background-color, color, box-shadow;
+  transition-duration: 150ms;
   outline: none;
 }
 
 .btn:focus {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+  outline: none;
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #000;
 }
 
 .btn:disabled {
@@ -72,16 +74,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-  background-color: #0f172a; /* Slate 900 (Navy) */
+  background-color: #000;
   color: white;
+  border: 1px solid #000;
 }
 
 .btn-primary:hover {
-  background-color: #1e293b; /* Slate 800 */
+  background-color: #27272a; /* zinc-800 */
+  border-color: #27272a;
 }
 
 .btn-primary:focus {
-  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.5);
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #27272a;
 }
 
 .btn-secondary {
@@ -114,21 +118,24 @@ h1, h2, h3, h4, h5, h6 {
 
 .input-field {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 0.25rem;
-  border: 1px solid rgb(209 213 219);
-  background-color: rgb(248 250 252); /* Slate 50 */
-  color: rgb(17 24 39);
+  padding: 0.625rem 0.875rem;
+  border-radius: 6px;
+  border: 1px solid #e4e4e7; /* zinc-200 */
+  background-color: #ffffff;
+  color: #18181b; /* zinc-900 */
+  font-size: 0.875rem;
+  transition: border-color 150ms;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
 }
 
 .input-field::placeholder {
-  color: rgb(156 163 175);
+  color: #a1a1aa; /* zinc-400 */
 }
 
 .input-field:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.3);
-  border-color: #0f172a;
+  border-color: #000;
+  box-shadow: 0 0 0 1px #000;
 }
 
 .input-field:disabled {
@@ -157,23 +164,27 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .badge-primary {
-  background-color: rgb(224 231 255);
-  color: rgb(67 56 202);
+  background-color: #f4f4f5; /* zinc-100 */
+  color: #18181b; /* zinc-900 */
+  border: 1px solid #e4e4e7;
 }
 
 .badge-success {
-  background-color: rgb(209 250 229);
-  color: rgb(5 150 105);
+  background-color: #f4f4f5;
+  color: #18181b;
+  border: 1px solid #e4e4e7;
 }
 
 .badge-warning {
-  background-color: rgb(254 243 199);
-  color: rgb(180 83 9);
+  background-color: #f4f4f5;
+  color: #52525b; /* zinc-600 */
+  border: 1px dashed #e4e4e7;
 }
 
 .badge-gray {
-  background-color: rgb(243 244 246);
-  color: rgb(55 65 81);
+  background-color: #f4f4f5;
+  color: #52525b;
+  border: 1px solid #e4e4e7;
 }
 
 /* Container */
@@ -214,10 +225,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Text Styles */
 .text-gradient {
-  background: linear-gradient(to right, #0f172a, #334155);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #000; /* Solid black instead of gradient for minimalism */
 }
 
 /* Shadow Utilities */

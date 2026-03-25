@@ -10,7 +10,7 @@ const services = [
         id: 'passport', 
         name: 'Passport Services', 
         icon: Shield, 
-        color: 'slate',
+        color: 'mono',
         time: '3 min', 
         status: 'live',
         description: 'Apply for new passport or renewal'
@@ -19,7 +19,7 @@ const services = [
         id: 'income', 
         name: 'Income Certificate', 
         icon: FileText, 
-        color: 'slate',
+        color: 'mono',
         time: '2 min', 
         status: 'soon',
         description: 'Get your income certificate online'
@@ -28,7 +28,7 @@ const services = [
         id: 'domicile', 
         name: 'Domicile Certificate', 
         icon: Home, 
-        color: 'slate',
+        color: 'mono',
         time: '2 min', 
         status: 'soon',
         description: 'Apply for domicile certificate'
@@ -37,7 +37,7 @@ const services = [
         id: 'driving', 
         name: 'Driving License', 
         icon: Car, 
-        color: 'slate',
+        color: 'mono',
         time: '4 min', 
         status: 'soon',
         description: 'New license or renewal'
@@ -46,7 +46,7 @@ const services = [
         id: 'ration', 
         name: 'Ration Card', 
         icon: Wallet, 
-        color: 'slate',
+        color: 'mono',
         time: '3 min', 
         status: 'soon',
         description: 'Apply for ration card'
@@ -55,19 +55,12 @@ const services = [
         id: 'birth', 
         name: 'Birth Certificate', 
         icon: Baby, 
-        color: 'slate',
+        color: 'mono',
         time: '3 min', 
         status: 'soon',
         description: 'Get birth certificate online'
     }
 ];
-
-const colorClasses = {
-    slate: 'bg-slate-50 text-slate-700 border-slate-200',
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
-    emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    amber: 'bg-amber-50 text-amber-700 border-amber-200'
-};
 
 export default function HomePage() {
     const navigate = useNavigate();
@@ -92,9 +85,8 @@ export default function HomePage() {
                         className="space-y-8"
                     >
                         {/* Badge */}
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-200 rounded-md">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                            <span className="text-sm font-semibold text-slate-700">Enterprise AI Engine</span>
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-100 border border-zinc-200 rounded-md shadow-sm">
+                            <span className="text-xs font-bold text-zinc-800 tracking-wide uppercase">Enterprise AI Engine</span>
                         </div>
 
                         {/* Main Heading */}
@@ -136,11 +128,13 @@ export default function HomePage() {
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: 0.3 + i * 0.1 }}
-                                    className="card p-6 text-center"
+                                    className="card p-6 text-center border-zinc-200"
                                 >
-                                    <stat.icon className="w-6 h-6 text-slate-800 mx-auto mb-2" />
-                                    <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                                    <div className="text-sm text-gray-600">{stat.label}</div>
+                                    <div className="w-10 h-10 rounded border border-zinc-200 bg-zinc-50 flex items-center justify-center mx-auto mb-3">
+                                        <stat.icon className="w-5 h-5 text-black" />
+                                    </div>
+                                    <div className="text-2xl font-bold text-black mb-1 tracking-tight">{stat.value}</div>
+                                    <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{stat.label}</div>
                                 </motion.div>
                             ))}
                         </div>
@@ -180,8 +174,8 @@ export default function HomePage() {
                                 )}
 
                                 {/* Icon */}
-                                <div className={`w-14 h-14 rounded-xl ${colorClasses[service.color]} flex items-center justify-center mb-4 border`}>
-                                    <ServiceIcon size={24} />
+                                <div className={`w-12 h-12 rounded border border-zinc-200 bg-zinc-50 flex items-center justify-center mb-5`}>
+                                    <ServiceIcon size={20} className="text-black" />
                                 </div>
 
                                 {/* Content */}
@@ -258,10 +252,10 @@ export default function HomePage() {
                                 >
                                     {/* Number Badge */}
                                     <div className="relative inline-block mb-6">
-                                        <div className={`w-16 h-16 rounded-lg ${colorClasses[step.color]} flex items-center justify-center border shadow-sm`}>
+                                        <div className={`w-16 h-16 rounded bg-zinc-50 text-black flex items-center justify-center border border-zinc-200 shadow-sm`}>
                                             <StepIcon size={28} />
                                         </div>
-                                        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-sm bg-slate-900 flex items-center justify-center shadow-sm">
+                                        <div className="absolute -top-2 -right-2 w-8 h-8 rounded bg-black flex items-center justify-center shadow-sm">
                                             <span className="text-sm font-bold text-white">{step.num}</span>
                                         </div>
                                     </div>
@@ -297,13 +291,13 @@ export default function HomePage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
-                                className="card p-6 text-center border-slate-200"
+                                className="card p-6 text-center border-zinc-200"
                             >
-                                <div className={`w-12 h-12 rounded-lg ${colorClasses[feature.color]} flex items-center justify-center mx-auto mb-4 border`}>
-                                    <FeatureIcon size={20} />
+                                <div className={`w-12 h-12 rounded bg-zinc-50 flex items-center justify-center mx-auto mb-4 border border-zinc-200`}>
+                                    <FeatureIcon size={20} className="text-black" />
                                 </div>
-                                <h4 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h4>
-                                <p className="text-sm text-gray-600">{feature.desc}</p>
+                                <h4 className="text-lg font-bold text-black mb-2">{feature.title}</h4>
+                                <p className="text-sm text-zinc-600">{feature.desc}</p>
                             </motion.div>
                         );
                     })}
@@ -312,24 +306,24 @@ export default function HomePage() {
 
             {/* CTA */}
             <section className="container">
-                <div className="card p-12 md:p-16 text-center bg-slate-900 border-slate-800 text-white">
+                <div className="card p-12 md:p-16 text-center bg-black border-black text-white rounded">
                     <div className="max-w-2xl mx-auto space-y-6">
-                        <Shield className="w-12 h-12 mx-auto text-amber-500" />
-                        <h2 className="text-4xl md:text-5xl font-bold">Ready to Deploy?</h2>
-                        <p className="text-xl text-slate-300">
+                        <Shield className="w-12 h-12 mx-auto text-white" />
+                        <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Ready to Deploy?</h2>
+                        <p className="text-xl text-zinc-400">
                             Join the <span className="font-semibold text-white">enterprise teams</span> accelerating their regulatory pipelines.
                         </p>
 
                         <button
                             onClick={() => navigate('/apply/passport/state')}
-                            className="btn bg-white text-slate-900 hover:bg-slate-100 px-8 py-3.5 text-base font-bold shadow-lg"
+                            className="btn bg-white text-black hover:bg-zinc-200 px-8 py-3.5 text-sm font-bold shadow-soft"
                         >
-                            <Zap size={20} className="text-amber-500" />
+                            <Zap size={18} className="text-black" />
                             Start Free Now
-                            <ArrowRight size={20} />
+                            <ArrowRight size={18} />
                         </button>
 
-                        <p className="text-sm text-slate-400">Zero Trust Architecture • Configurable Modules</p>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">Zero Trust Architecture • Configurable Modules</p>
                     </div>
                 </div>
             </section>

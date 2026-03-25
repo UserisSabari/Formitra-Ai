@@ -18,7 +18,28 @@ export default function DocumentUploadPage() {
     const [aiPackageResult, setAiPackageResult] = useState(null);
     const [isVerifying, setIsVerifying] = useState(false);
     const [isFixingBg, setIsFixingBg] = useState(false);
+    const [dragActive, setDragActive] = useState(false);
+    const [loadingStepIdx, setLoadingStepIdx] = useState(0);
     const fileInputRef = useRef(null);
+
+    const loadingMessages = [
+        "Uploading encrypted payload...",
+        "Initializing Gemini 1.5 Pro Vision AI...",
+        "Scanning high-density document markers...",
+        "Extracting explicit OCR entities...",
+        "Finalizing form schema validation mapping..."
+    ];
+
+    useEffect(() => {
+        let interval;
+        if (isVerifying) {
+            setLoadingStepIdx(0);
+            interval = setInterval(() => {
+                setLoadingStepIdx(prev => Math.min(prev + 1, loadingMessages.length - 1));
+            }, 3000);
+        }
+        return () => clearInterval(interval);
+    }, [isVerifying]);
 
     useEffect(() => {
         const saved = localStorage.getItem(LOCAL_STORAGE_FORM_KEY);
@@ -36,39 +57,56 @@ export default function DocumentUploadPage() {
         navigate(`/apply/${serviceId}/state`);
     };
 
-    const handleFileSelect = async (e) => {
-        if (e.target.files) {
-            const newFiles = Array.from(e.target.files);
-            const processedFiles = [];
-
-            for (const file of newFiles) {
-                // Only compress images, let PDFs pass through
-                if (file.type.startsWith('image/')) {
-                    const options = {
-                        maxSizeMB: 1,          // Compress to max 1MB
-                        maxWidthOrHeight: 1920, // Resize if extremely large
-                        useWebWorker: true,
-                        fileType: 'image/jpeg'  // Force conversion to standard JPEG for Gemini
-                    };
-                    try {
-                        const compressedFile = await imageCompression(file, options);
-
-                        // browser-image-compression returns a Blob, we convert it back to a File object with the original name
-                        const finalFile = new File([compressedFile], file.name, {
-                            type: 'image/jpeg',
-                            lastModified: Date.now(),
-                        });
-                        processedFiles.push(finalFile);
-                    } catch (error) {
-                        console.error('Error compressing image:', error);
-                        processedFiles.push(file); // fallback to original if compression fails
-                    }
-                } else {
+    const processFiles = async (newFiles) => {
+        const processedFiles = [];
+        for (const file of newFiles) {
+            if (file.type.startsWith('image/')) {
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1920,
+                    useWebWorker: true,
+                    fileType: 'image/jpeg'
+                };
+                try {
+                    const compressedFile = await imageCompression(file, options);
+                    const finalFile = new File([compressedFile], file.name, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now(),
+                    });
+                    processedFiles.push(finalFile);
+                } catch (error) {
+                    console.error('Error compressing image:', error);
                     processedFiles.push(file);
                 }
+            } else {
+                processedFiles.push(file);
             }
+        }
+        setSelectedFiles(prev => [...prev, ...processedFiles]);
+    };
 
-            setSelectedFiles(prev => [...prev, ...processedFiles]);
+    const handleFileSelect = async (e) => {
+        if (e.target.files) {
+            await processFiles(Array.from(e.target.files));
+        }
+    };
+
+    const handleDrag = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === "dragenter" || e.type === "dragover") {
+            setDragActive(true);
+        } else if (e.type === "dragleave") {
+            setDragActive(false);
+        }
+    };
+
+    const handleDrop = async function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            await processFiles(Array.from(e.dataTransfer.files));
         }
     };
 
@@ -225,7 +263,7 @@ export default function DocumentUploadPage() {
                     </button>
                     <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex flex-wrap items-center gap-3">
                         Document Upload Portal
-                        <span className="px-3 py-1 bg-slate-900 text-amber-400 rounded-sm border border-slate-700 text-xs font-bold tracking-wider uppercase shadow-sm whitespace-nowrap">
+                        <span className="px-2 py-0.5 bg-black text-white rounded border border-zinc-800 text-[10px] font-bold tracking-widest uppercase shadow-sm whitespace-nowrap">
                             AI Intake Enabled
                         </span>
                     </h1>
@@ -242,28 +280,28 @@ export default function DocumentUploadPage() {
                     </h3>
                     <ul className="space-y-3 text-sm text-gray-700">
                         <li className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">1</span>
+                            <span className="flex-shrink-0 w-6 h-6 rounded bg-zinc-100 border border-zinc-200 text-black flex items-center justify-center font-bold text-xs">1</span>
                             <div>
                                 <p className="font-semibold text-gray-900">Recent Passport-Sized Photograph <span className="text-red-500">*</span></p>
                                 <p className="text-gray-500">Color photo with a plain white or light background.</p>
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">2</span>
+                            <span className="flex-shrink-0 w-6 h-6 rounded bg-zinc-100 border border-zinc-200 text-black flex items-center justify-center font-bold text-xs">2</span>
                             <div>
                                 <p className="font-semibold text-gray-900">Proof of Address <span className="text-red-500">*</span></p>
                                 <p className="text-gray-500">E.g., Aadhaar Card, Voter ID, Electricity Bill, or Bank Passbook.</p>
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs">3</span>
+                            <span className="flex-shrink-0 w-6 h-6 rounded bg-zinc-50 border border-zinc-100 text-zinc-500 flex items-center justify-center font-bold text-xs">3</span>
                             <div>
                                 <p className="font-semibold text-gray-900">Proof of Date of Birth <span className="text-gray-400 font-normal">(Optional)</span></p>
                                 <p className="text-gray-500">E.g., Birth Certificate, PAN Card, or School Leaving Certificate.</p>
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs">4</span>
+                            <span className="flex-shrink-0 w-6 h-6 rounded bg-zinc-50 border border-zinc-100 text-zinc-500 flex items-center justify-center font-bold text-xs">4</span>
                             <div>
                                 <p className="font-semibold text-gray-900">Non-ECR Proof <span className="text-gray-400 font-normal">(Optional)</span></p>
                                 <p className="text-gray-500">10th Standard Marksheet or higher educational degree.</p>
@@ -272,12 +310,19 @@ export default function DocumentUploadPage() {
                     </ul>
                 </div>
 
-                <div className="card p-8 md:p-12 space-y-8 border-2 border-dashed border-slate-300 bg-slate-50/50 hover:bg-slate-100 transition-colors shadow-none text-center rounded-md">
-                    <div className="mx-auto w-16 h-16 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-sm">
-                        <UploadCloud size={32} className="text-slate-700" />
+                <div 
+                    className={`card p-8 md:p-12 space-y-8 border-2 border-dashed transition-colors shadow-none text-center rounded-md cursor-pointer ${dragActive ? 'border-amber-500 bg-amber-50/30' : 'border-slate-300 bg-slate-50/50 hover:bg-slate-100'}`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <div className="mx-auto w-16 h-16 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-sm pointer-events-none">
+                        <UploadCloud size={32} className={`transition-colors ${dragActive ? 'text-amber-500' : 'text-slate-700'}`} />
                     </div>
-                    <div>
-                        <p className="text-lg font-medium text-gray-900">Drop your files here</p>
+                    <div className="pointer-events-none">
+                        <p className={`text-lg font-medium ${dragActive ? 'text-amber-700' : 'text-gray-900'}`}>Drop your files here or click anywhere to browse</p>
                         <p className="text-sm text-gray-500 mt-1">Accepts JPG, PNG, and PDF up to 5MB each</p>
                     </div>
                     <input
@@ -289,8 +334,7 @@ export default function DocumentUploadPage() {
                         onChange={handleFileSelect}
                     />
                     <button
-                        className="btn-secondary"
-                        onClick={() => fileInputRef.current?.click()}
+                        className="btn-secondary pointer-events-none"
                     >
                         Browse Files
                     </button>
@@ -343,10 +387,28 @@ export default function DocumentUploadPage() {
                 )}
 
                 {isVerifying && (
-                    <div className="p-10 text-center space-y-4 bg-white rounded-md shadow-sm border border-slate-200">
-                        <div className="animate-spin w-10 h-10 border-4 border-slate-200 border-t-slate-800 rounded-full mx-auto"></div>
-                        <p className="text-lg text-slate-900 font-bold">Gemini AI is extracting your data...</p>
-                        <p className="text-sm text-slate-500 max-w-sm mx-auto">Parsing text, identifying OCR entities, and structuring to your application.</p>
+                    <div className="p-10 text-center space-y-6 bg-white rounded-md shadow-sm border border-slate-200">
+                        <div className="relative w-16 h-16 mx-auto">
+                            <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+                            <div className="absolute inset-0 border-4 border-slate-800 rounded-full border-t-transparent animate-spin"></div>
+                            <div className="absolute inset-0 flex items-center justify-center text-slate-800">
+                                <ShieldCheck size={20} />
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-lg text-slate-900 font-bold mb-2">Secure AI Extraction in Progress...</p>
+                            <div className="h-6 overflow-hidden">
+                                <motion.p 
+                                    key={loadingStepIdx}
+                                    initial={{ y: 20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: -20, opacity: 0 }}
+                                    className="text-sm font-medium text-amber-600 truncate"
+                                >
+                                    {loadingMessages[loadingStepIdx]}
+                                </motion.p>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -360,12 +422,12 @@ export default function DocumentUploadPage() {
 
                 {aiPackageResult?.status === 'success' && !isVerifying && (
                     <div className="space-y-6 pt-4">
-                        <div className="p-6 rounded-md border-2 shadow-sm bg-emerald-50 border-emerald-400">
+                        <div className="p-6 rounded-md border border-zinc-200 shadow-sm bg-white">
                             <div className="flex items-start gap-4">
-                                <CheckCircle className="text-emerald-500 mt-1 flex-shrink-0" size={32} />
+                                <CheckCircle className="text-black mt-1 flex-shrink-0" size={32} />
                                 <div>
-                                    <h3 className="text-2xl font-black text-slate-900 leading-none mb-2">Extraction Successful</h3>
-                                    <p className="text-sm font-semibold text-emerald-800">
+                                    <h3 className="text-2xl font-black text-slate-900 leading-none mb-2 tracking-tight">Data Extracted Successfully</h3>
+                                    <p className="text-sm font-semibold text-zinc-600">
                                         {aiPackageResult.message}
                                     </p>
                                     
@@ -374,8 +436,8 @@ export default function DocumentUploadPage() {
                                         {Object.entries(aiPackageResult.data).map(([key, val]) => {
                                             if (!val) return null;
                                             return (
-                                                <div key={key} className="bg-white/80 p-2 rounded border border-emerald-200 shadow-sm text-sm">
-                                                    <div className="text-[10px] text-emerald-600 uppercase font-black tracking-wider">{key}</div>
+                                                <div key={key} className="bg-zinc-50 p-2 rounded border border-zinc-200 shadow-sm text-sm">
+                                                    <div className="text-[10px] text-zinc-500 uppercase font-black tracking-wider">{key}</div>
                                                     <div className="font-semibold text-slate-800 mt-0.5 truncate">{val}</div>
                                                 </div>
                                             );
@@ -384,6 +446,41 @@ export default function DocumentUploadPage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Post-Extraction Image Enhancements */}
+                        {selectedFiles.some(f => f.type.startsWith('image/')) && (
+                            <div className="p-6 rounded-md border border-zinc-200 shadow-sm bg-zinc-50">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 mt-1 w-10 h-10 bg-black rounded flex items-center justify-center">
+                                        <Wand2 className="text-white" size={20} />
+                                    </div>
+                                    <div className="w-full">
+                                        <h3 className="text-lg font-bold text-slate-900 mb-1 tracking-tight">AI Photo Enhancements Available</h3>
+                                        <p className="text-sm font-medium text-slate-600 mb-4">
+                                            We noticed you uploaded photos. If they contain casual backgrounds, you can use our local WebAssembly engine to instantly strip the background and convert them into pure white, passport-ready headshots. 
+                                        </p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {selectedFiles.map((file, idx) => {
+                                                if (!file.type.startsWith('image/')) return null;
+                                                return (
+                                                    <div key={idx} className="flex flex-col gap-2 p-3 bg-white border border-zinc-200 rounded-md">
+                                                        <span className="text-xs font-semibold text-slate-700 truncate">{file.name}</span>
+                                                        <button
+                                                            onClick={() => fixPhotoBackground(file, idx)}
+                                                            disabled={isFixingBg}
+                                                            className="text-xs bg-black hover:bg-zinc-800 text-white font-bold py-2 px-3 rounded flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                                                        >
+                                                            <Wand2 size={14} />
+                                                            {isFixingBg ? 'Processing...' : 'Auto-Fix Background'}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 

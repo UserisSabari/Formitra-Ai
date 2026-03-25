@@ -142,84 +142,26 @@ export default function ReviewPage() {
                         <Section title="Passport Details" icon={FileText} fields={passportFields} />
                     </div>
 
-                    {docValidation && (
+                    {docValidation && docValidation.status === 'success' && (
                         <>
                             <div className="divider"></div>
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 uppercase tracking-wider">
                                     <ShieldCheck size={16} />
-                                    AI Document Verification Summary
+                                    AI Extraction Status
                                 </div>
 
-                                {/* Global Package Health Card from Gemini */}
-                                <div className={`p-5 rounded-xl border ${docValidation.packageStatus === 'Valid' ? 'bg-emerald-50 border-emerald-200' : docValidation.packageStatus === 'Error' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
-                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
-                                        <div className="flex items-start gap-3">
-                                            {docValidation.packageStatus === 'Valid' ? (
-                                                <CheckCircle className="text-emerald-500 mt-0.5 flex-shrink-0" size={24} />
-                                            ) : docValidation.packageStatus === 'Error' ? (
-                                                <AlertCircle className="text-red-500 mt-0.5 flex-shrink-0" size={24} />
-                                            ) : (
-                                                <AlertCircle className="text-amber-500 mt-0.5 flex-shrink-0" size={24} />
-                                            )}
-                                            <div>
-                                                <h3 className="font-bold text-gray-900 text-lg">Application Package Health</h3>
-                                                <div className="mt-1 flex items-center gap-2">
-                                                    <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full ${docValidation.packageStatus === 'Valid' ? 'bg-emerald-100 text-emerald-800' : docValidation.packageStatus === 'Error' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}`}>
-                                                        {docValidation.packageStatus.toUpperCase()}
-                                                    </span>
-                                                    {docValidation.overallScore !== undefined && (
-                                                        <span className="text-xs font-bold text-gray-600 bg-white/60 px-2 py-0.5 rounded border border-gray-200">
-                                                            Score: {docValidation.overallScore}/100
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
+                                <div className="p-5 rounded-xl border bg-emerald-50 border-emerald-200">
+                                    <div className="flex items-start gap-3">
+                                        <CheckCircle className="text-emerald-500 mt-0.5 flex-shrink-0" size={24} />
+                                        <div>
+                                            <h3 className="font-bold text-emerald-900 text-lg">Extraction Successful</h3>
+                                            <p className="text-sm text-emerald-800 mt-1 leading-relaxed font-medium">
+                                                {docValidation.message || "Your identity details were successfully extracted from the uploaded documents and pre-filled into this application."}
+                                            </p>
                                         </div>
                                     </div>
-
-                                    <div className="bg-white/70 p-4 rounded-lg border border-white/60 shadow-sm mt-3">
-                                        <p className="flex items-center gap-2 text-xs font-bold text-indigo-900 mb-2 uppercase tracking-wider">
-                                            <ShieldCheck size={14} /> Collective AI Analysis
-                                        </p>
-                                        <p className="text-sm text-gray-800 leading-relaxed font-medium">"{docValidation.collectiveInsights}"</p>
-                                    </div>
                                 </div>
-
-                                {/* Document Breakdown */}
-                                {docValidation.documentBreakdown && docValidation.documentBreakdown.length > 0 && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                                        {docValidation.documentBreakdown.map((doc, idx) => (
-                                            <div key={idx} className={`p-4 rounded-lg border bg-white ${doc.status === 'Valid' ? 'border-emerald-200 shadow-sm' : doc.status === 'Error' ? 'border-red-300 shadow-sm' : 'border-amber-200 shadow-sm'}`}>
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    {doc.status === 'Valid' ? (
-                                                        <CheckCircle className="text-emerald-500 flex-shrink-0" size={16} />
-                                                    ) : doc.status === 'Error' ? (
-                                                        <AlertCircle className="text-red-500 flex-shrink-0" size={16} />
-                                                    ) : (
-                                                        <AlertCircle className="text-amber-500 flex-shrink-0" size={16} />
-                                                    )}
-                                                    <div>
-                                                        <p className="font-bold text-gray-900 text-sm truncate">{doc.originalFileName || `Document ${idx + 1}`}</p>
-                                                        <p className="text-[10px] font-bold text-gray-500 uppercase">{doc.inferredDocumentType}</p>
-                                                    </div>
-                                                </div>
-
-                                                {doc.issues && doc.issues.length > 0 ? (
-                                                    <ul className={`mt-2 list-disc list-inside text-xs space-y-0.5 ${doc.status === 'Error' ? 'text-red-700' : 'text-amber-700'}`}>
-                                                        {doc.issues.map((issue, i) => (
-                                                            <li key={i}>{issue}</li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="mt-2 text-xs text-emerald-700 font-medium flex items-center gap-1">
-                                                        <CheckCircle2 size={12} /> Document looks perfect.
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
                         </>
                     )}
