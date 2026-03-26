@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sparkles, MapPin, ChevronRight, Home } from 'lucide-react';
@@ -5,6 +6,11 @@ import { Sparkles, MapPin, ChevronRight, Home } from 'lucide-react';
 export default function Layout() {
     const navigate = useNavigate();
     const location = useLocation();
+
+    // Scroll to top on route change
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location.pathname]);
 
     const pathParts = location.pathname.split('/');
     const serviceId = pathParts[2];

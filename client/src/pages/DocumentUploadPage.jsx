@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, ShieldCheck, UploadCloud, AlertCircle, CheckCircle, FileText, Wand2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShieldCheck, UploadCloud, AlertCircle, CheckCircle, FileText, Wand2, Sparkles, ChevronRight } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import { removeBackground } from '@imgly/background-removal';
 import { AI_API_BASE_URL } from '../config/api';
@@ -247,198 +247,226 @@ export default function DocumentUploadPage() {
     };
 
     return (
-        <div className="container py-12">
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="max-w-4xl mx-auto space-y-8"
-            >
-                <div>
+        <div className="min-h-screen bg-[#fafbfc] pb-24">
+            {/* Minimalist Top Banner */}
+            <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+                <div className="container py-4 flex items-center justify-between">
                     <button
                         onClick={handleBackToForm}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors text-sm mb-3"
+                        className="flex items-center gap-2 text-slate-500 hover:text-[#1978E5] transition-colors text-sm font-semibold"
                     >
                         <ArrowLeft size={16} />
-                        Back to State Selection
+                        Back to Requirements
                     </button>
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex flex-wrap items-center gap-3">
-                        Document Upload Portal
-                        <span className="px-2 py-0.5 bg-black text-white rounded border border-zinc-800 text-[10px] font-bold tracking-widest uppercase shadow-sm whitespace-nowrap">
-                            AI Intake Enabled
-                        </span>
-                    </h1>
-                    <p className="text-gray-600 max-w-2xl text-sm md:text-base">
-                        Upload your supporting documents here. Our Enterprise AI engine will automatically parse them, securely extract the data, and auto-fill your entire application instantly.
-                    </p>
+                    <div className="hidden sm:flex items-center gap-2 text-xs font-bold text-slate-400 tracking-wider uppercase">
+                        <span>{decodedState}</span>
+                        <ChevronRight size={12} />
+                        <span className="text-[#1978E5]">Upload</span>
+                    </div>
                 </div>
+            </div>
 
-                {/* Document Guidelines Section */}
-                <div className="bg-slate-50 p-6 rounded-md border border-slate-200 shadow-sm">
-                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <ShieldCheck size={20} className="text-slate-700" />
-                        Required Documents for Application
-                    </h3>
-                    <ul className="space-y-3 text-sm text-gray-700">
-                        <li className="flex items-start gap-3">
-                            <span className="shrink-0 w-6 h-6 rounded bg-zinc-100 border border-zinc-200 text-black flex items-center justify-center font-bold text-xs">1</span>
-                            <div>
-                                <p className="font-semibold text-gray-900">Recent Passport-Sized Photograph <span className="text-red-500">*</span></p>
-                                <p className="text-gray-500">Color photo with a plain white or light background.</p>
-                            </div>
-                        </li>
-                        <li className="flex items-start gap-3">
-                            <span className="shrink-0 w-6 h-6 rounded bg-zinc-100 border border-zinc-200 text-black flex items-center justify-center font-bold text-xs">2</span>
-                            <div>
-                                <p className="font-semibold text-gray-900">Proof of Address <span className="text-red-500">*</span></p>
-                                <p className="text-gray-500">E.g., Aadhaar Card, Voter ID, Electricity Bill, or Bank Passbook.</p>
-                            </div>
-                        </li>
-                        <li className="flex items-start gap-3">
-                            <span className="shrink-0 w-6 h-6 rounded bg-zinc-50 border border-zinc-100 text-zinc-500 flex items-center justify-center font-bold text-xs">3</span>
-                            <div>
-                                <p className="font-semibold text-gray-900">Proof of Date of Birth <span className="text-gray-400 font-normal">(Optional)</span></p>
-                                <p className="text-gray-500">E.g., Birth Certificate, PAN Card, or School Leaving Certificate.</p>
-                            </div>
-                        </li>
-                        <li className="flex items-start gap-3">
-                            <span className="shrink-0 w-6 h-6 rounded bg-zinc-50 border border-zinc-100 text-zinc-500 flex items-center justify-center font-bold text-xs">4</span>
-                            <div>
-                                <p className="font-semibold text-gray-900">Non-ECR Proof <span className="text-gray-400 font-normal">(Optional)</span></p>
-                                <p className="text-gray-500">10th Standard Marksheet or higher educational degree.</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-
-                <div 
-                    className={`card p-8 md:p-12 space-y-8 border-2 border-dashed transition-colors shadow-none text-center rounded-md cursor-pointer ${dragActive ? 'border-amber-500 bg-amber-50/30' : 'border-slate-300 bg-slate-50/50 hover:bg-slate-100'}`}
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
+            <div className="container py-12">
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-4xl mx-auto space-y-10"
                 >
-                    <div className="mx-auto w-16 h-16 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-sm pointer-events-none">
-                        <UploadCloud size={32} className={`transition-colors ${dragActive ? 'text-amber-500' : 'text-slate-700'}`} />
+                    <div className="text-center space-y-4 mb-4">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold tracking-wide uppercase mb-2">
+                            <Sparkles size={14} /> AI Intake Enabled
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+                            Secure Document Upload
+                        </h1>
+                        <p className="text-slate-500 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
+                            Upload your supporting documents here. Our Enterprise AI engine will automatically parse them, securely extract the data, and auto-fill your entire application instantly.
+                        </p>
                     </div>
-                    <div className="pointer-events-none">
-                        <p className={`text-lg font-medium ${dragActive ? 'text-amber-700' : 'text-gray-900'}`}>Drop your files here or click anywhere to browse</p>
-                        <p className="text-sm text-gray-500 mt-1">Accepts JPG, PNG, and PDF up to 5MB each</p>
+
+                    {/* Document Guidelines Section */}
+                    <div className="card overflow-hidden border-0 shadow-soft">
+                        <div className="h-1 w-full bg-linear-to-r from-[#1978E5] to-purple-500"></div>
+                        <div className="p-6 md:p-8 bg-white">
+                            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <FileText size={22} className="text-[#1978E5]" />
+                                Required Documents Checklist
+                            </h3>
+                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <li className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-100 transition-colors">
+                                    <span className="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm shadow-sm">1</span>
+                                    <div>
+                                        <p className="font-bold text-slate-900 mb-1">Recent Photograph <span className="text-red-500">*</span></p>
+                                        <p className="text-slate-500 text-sm leading-relaxed">Color photo with a plain white or light background.</p>
+                                    </div>
+                                </li>
+                                <li className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-100 transition-colors">
+                                    <span className="shrink-0 w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm shadow-sm">2</span>
+                                    <div>
+                                        <p className="font-bold text-slate-900 mb-1">Proof of Address <span className="text-red-500">*</span></p>
+                                        <p className="text-slate-500 text-sm leading-relaxed">Aadhaar Card, Voter ID, or Utility Bill.</p>
+                                    </div>
+                                </li>
+                                <li className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-100 transition-colors">
+                                    <span className="shrink-0 w-8 h-8 rounded-full bg-slate-100/50 border border-slate-200/50 text-slate-400 flex items-center justify-center font-bold text-sm">3</span>
+                                    <div>
+                                        <p className="font-bold text-slate-900 mb-1">Proof of Date of Birth <span className="text-slate-400 font-medium text-xs uppercase ml-1">(Optional)</span></p>
+                                        <p className="text-slate-500 text-sm leading-relaxed">Birth Certificate or PAN Card.</p>
+                                    </div>
+                                </li>
+                                <li className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-100 transition-colors">
+                                    <span className="shrink-0 w-8 h-8 rounded-full bg-slate-100/50 border border-slate-200/50 text-slate-400 flex items-center justify-center font-bold text-sm">4</span>
+                                    <div>
+                                        <p className="font-bold text-slate-900 mb-1">Non-ECR Proof <span className="text-slate-400 font-medium text-xs uppercase ml-1">(Optional)</span></p>
+                                        <p className="text-slate-500 text-sm leading-relaxed">10th Standard Marksheet or higher degree.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <input
-                        type="file"
-                        multiple
-                        accept="image/jpeg,image/png,application/pdf"
-                        className="hidden"
-                        ref={fileInputRef}
-                        onChange={handleFileSelect}
-                    />
-                    <button
-                        className="btn-secondary pointer-events-none"
+
+                    <div 
+                        className={`group relative p-10 md:p-16 flex flex-col items-center justify-center text-center transition-all duration-300 rounded-2xl cursor-pointer overflow-hidden ${
+                            dragActive 
+                                ? 'bg-[#1978E5]/10 border-2 border-dashed border-[#1978E5] scale-[1.02]' 
+                                : 'bg-white border-2 border-dashed border-slate-300 hover:border-[#1978E5]/50 hover:bg-[#fafbfc] hover:shadow-lg'
+                        }`}
+                        onDragEnter={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDragOver={handleDrag}
+                        onDrop={handleDrop}
+                        onClick={() => fileInputRef.current?.click()}
                     >
-                        Browse Files
-                    </button>
-                </div>
+                        <div className={`w-20 h-20 mb-6 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+                            dragActive ? 'bg-[#1978E5] text-white scale-110 shadow-blue-500/20' : 'bg-blue-50 text-[#1978E5] group-hover:scale-110 group-hover:bg-[#1978E5] group-hover:text-white'
+                        }`}>
+                            <UploadCloud size={40} strokeWidth={1.5} />
+                        </div>
+                        <div className="space-y-2 pointer-events-none">
+                            <h3 className={`text-2xl font-bold tracking-tight ${dragActive ? 'text-[#1978E5]' : 'text-slate-900'}`}>
+                                Drop your files here
+                            </h3>
+                            <p className="text-slate-500 text-base font-medium">
+                                or <span className="text-[#1978E5] group-hover:underline">click to browse</span> from your device
+                            </p>
+                        </div>
+                        <p className="text-xs text-slate-400 font-medium mt-6 uppercase tracking-widest pointer-events-none">
+                            Accepts JPG, PNG, and PDF (Max 5MB)
+                        </p>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/jpeg,image/png,application/pdf"
+                            className="hidden"
+                            ref={fileInputRef}
+                            onChange={handleFileSelect}
+                        />
+                    </div>
 
                 {selectedFiles.length > 0 && (
-                    <div className="space-y-4">
-                        <h4 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <FileText size={20} className="text-amber-500" />
-                            Documents ready for intelligence pipeline
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                        <h4 className="text-lg font-bold text-slate-900 flex items-center gap-2 px-1">
+                            <CheckCircle size={20} className="text-[#1978E5]" />
+                            Documents Ready for Intelligence Pipeline
                         </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {selectedFiles.map((file, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
-                                    <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-600 shrink-0 font-bold text-xs uppercase">
+                                <div key={idx} className="flex flex-col p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-[#1978E5]/30 hover:shadow-md transition-all group relative">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="w-10 h-10 rounded-lg bg-[#1978E5]/10 flex items-center justify-center text-[#1978E5] shrink-0 font-bold text-xs uppercase">
                                             {file.name.split('.').pop()}
                                         </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-sm text-gray-800 truncate font-medium">{file.name}</span>
-                                            <span className="text-xs text-gray-500">
-                                                {(file.size / (1024 * 1024)).toFixed(2)} MB
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center">
-                                        {file.type.startsWith('image/') && (
-                                            <button
-                                                onClick={() => fixPhotoBackground(file, idx)}
-                                                disabled={isFixingBg}
-                                                className="text-xs text-amber-600 hover:text-amber-800 font-medium px-2 py-1 flex items-center gap-1 border border-transparent hover:border-amber-200 rounded transition-colors disabled:opacity-50"
-                                                title="Make this a passport photo with a white background"
-                                            >
-                                                <Wand2 size={12} />
-                                                Fix BG
-                                            </button>
-                                        )}
                                         <button
                                             onClick={() => removeFile(idx)}
                                             disabled={isFixingBg}
-                                            className="text-xs text-red-500 hover:text-red-700 hover:underline font-medium px-2 disabled:opacity-50"
+                                            className="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors disabled:opacity-50"
+                                            title="Remove File"
                                         >
-                                            Remove
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                                         </button>
                                     </div>
+                                    <div className="flex flex-col grow justify-end">
+                                        <span className="text-sm text-slate-800 truncate font-semibold w-[90%]" title={file.name}>{file.name}</span>
+                                        <span className="text-xs text-slate-400 font-medium mt-1">
+                                            {(file.size / (1024 * 1024)).toFixed(2)} MB
+                                        </span>
+                                    </div>
+
+                                    {/* Action row at bottom of card if applicable */}
+                                    {file.type.startsWith('image/') && (
+                                        <div className="mt-4 pt-3 border-t border-slate-100">
+                                            <button
+                                                onClick={() => fixPhotoBackground(file, idx)}
+                                                disabled={isFixingBg}
+                                                className="w-full text-xs text-[#1978E5] bg-[#1978E5]/5 hover:bg-[#1978E5]/10 font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                                            >
+                                                <Wand2 size={14} />
+                                                Fix Background
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </motion.div>
                 )}
 
                 {isVerifying && (
-                    <div className="p-10 text-center space-y-6 bg-white rounded-md shadow-sm border border-slate-200">
-                        <div className="relative w-16 h-16 mx-auto">
-                            <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
-                            <div className="absolute inset-0 border-4 border-slate-800 rounded-full border-t-transparent animate-spin"></div>
-                            <div className="absolute inset-0 flex items-center justify-center text-slate-800">
-                                <ShieldCheck size={20} />
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-10 text-center space-y-6 bg-white rounded-2xl shadow-soft border border-[#1978E5]/20 overflow-hidden relative">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1978E5] to-purple-500 animate-pulse"></div>
+                        <div className="relative w-20 h-20 mx-auto">
+                            <div className="absolute inset-0 border-4 border-[#1978E5]/20 rounded-full"></div>
+                            <div className="absolute inset-0 border-4 border-[#1978E5] rounded-full border-t-transparent animate-spin"></div>
+                            <div className="absolute inset-0 flex items-center justify-center text-[#1978E5]">
+                                <ShieldCheck size={28} />
                             </div>
                         </div>
                         <div>
-                            <p className="text-lg text-slate-900 font-bold mb-2">Secure AI Extraction in Progress...</p>
-                            <div className="h-6 overflow-hidden">
+                            <p className="text-xl text-slate-900 font-extrabold mb-3 tracking-tight">Enterprise AI Extraction Active</p>
+                            <div className="h-6 overflow-hidden max-w-sm mx-auto bg-slate-50 rounded-full px-4 py-1">
                                 <motion.p 
                                     key={loadingStepIdx}
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     exit={{ y: -20, opacity: 0 }}
-                                    className="text-sm font-medium text-amber-600 truncate"
+                                    className="text-xs font-bold text-[#1978E5] uppercase tracking-wider truncate"
                                 >
                                     {loadingMessages[loadingStepIdx]}
                                 </motion.p>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 )}
 
-                {/* High-level error banner for backend / network failures */}
                 {!isVerifying && aiPackageResult?.status === 'error' && (
-                    <div className="p-4 rounded-md bg-red-50 border border-red-200 text-sm text-red-800 flex items-center gap-3 font-semibold">
-                        <AlertCircle size={20} className="text-red-500 shrink-0" />
-                        <div>{aiPackageResult.message}</div>
-                    </div>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-5 rounded-xl bg-red-50 border border-red-200 text-sm text-red-800 flex items-center gap-4 font-semibold shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                            <AlertCircle size={20} className="text-red-500" />
+                        </div>
+                        <div className="leading-relaxed">{aiPackageResult.message}</div>
+                    </motion.div>
                 )}
 
                 {aiPackageResult?.status === 'success' && !isVerifying && (
-                    <div className="space-y-6 pt-4">
-                        <div className="p-6 rounded-md border border-zinc-200 shadow-sm bg-white">
-                            <div className="flex items-start gap-4">
-                                <CheckCircle className="text-black mt-1 shrink-0" size={32} />
-                                <div>
-                                    <h3 className="text-2xl font-black text-slate-900 leading-none mb-2 tracking-tight">Data Extracted Successfully</h3>
-                                    <p className="text-sm font-semibold text-zinc-600">
-                                        {aiPackageResult.message}
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pt-4">
+                        <div className="p-8 rounded-2xl border border-emerald-200 shadow-soft bg-emerald-50/30">
+                            <div className="flex flex-col md:flex-row md:items-start gap-6">
+                                <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-sm border border-emerald-200">
+                                    <CheckCircle size={28} strokeWidth={2.5} />
+                                </div>
+                                <div className="grow">
+                                    <h3 className="text-2xl font-extrabold text-slate-900 mb-2 tracking-tight">Intelligence Payload Extracted</h3>
+                                    <p className="text-sm font-medium text-slate-600 mb-6">
+                                        Data successfully pulled from verified documents. Fields have been securely injected into your application memory.
                                     </p>
                                     
-                                    {/* Preview grid */}
-                                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                         {Object.entries(aiPackageResult.data).map(([key, val]) => {
                                             if (!val) return null;
                                             return (
-                                                <div key={key} className="bg-zinc-50 p-2 rounded border border-zinc-200 shadow-sm text-sm">
-                                                    <div className="text-[10px] text-zinc-500 uppercase font-black tracking-wider">{key}</div>
-                                                    <div className="font-semibold text-slate-800 mt-0.5 truncate">{val}</div>
+                                                <div key={key} className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                                    <div className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">{key}</div>
+                                                    <div className="font-bold text-slate-800 text-sm truncate">{val}</div>
                                                 </div>
                                             );
                                         })}
@@ -447,31 +475,30 @@ export default function DocumentUploadPage() {
                             </div>
                         </div>
 
-                        {/* Post-Extraction Image Enhancements */}
                         {selectedFiles.some(f => f.type.startsWith('image/')) && (
-                            <div className="p-6 rounded-md border border-zinc-200 shadow-sm bg-zinc-50">
-                                <div className="flex items-start gap-4">
-                                    <div className="shrink-0 mt-1 w-10 h-10 bg-black rounded flex items-center justify-center">
-                                        <Wand2 className="text-white" size={20} />
+                            <div className="p-8 rounded-2xl border border-purple-200 shadow-soft bg-purple-50/30">
+                                <div className="flex flex-col md:flex-row md:items-start gap-6">
+                                    <div className="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0 shadow-sm border border-purple-200">
+                                        <Wand2 size={24} strokeWidth={2.5} />
                                     </div>
-                                    <div className="w-full">
-                                        <h3 className="text-lg font-bold text-slate-900 mb-1 tracking-tight">AI Photo Enhancements Available</h3>
-                                        <p className="text-sm font-medium text-slate-600 mb-4">
-                                            We noticed you uploaded photos. If they contain casual backgrounds, you can use our local WebAssembly engine to instantly strip the background and convert them into pure white, passport-ready headshots. 
+                                    <div className="grow">
+                                        <h3 className="text-xl font-extrabold text-slate-900 mb-2 tracking-tight">Image Enhancement Available</h3>
+                                        <p className="text-sm font-medium text-slate-600 mb-6">
+                                            We noticed passport-style photos. Instantly strip casual backgrounds entirely in-browser using our local AI WASM engine for perfect ID compliance.
                                         </p>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {selectedFiles.map((file, idx) => {
                                                 if (!file.type.startsWith('image/')) return null;
                                                 return (
-                                                    <div key={idx} className="flex flex-col gap-2 p-3 bg-white border border-zinc-200 rounded-md">
-                                                        <span className="text-xs font-semibold text-slate-700 truncate">{file.name}</span>
+                                                    <div key={idx} className="flex flex-col gap-3 p-4 bg-white border border-slate-200 shadow-sm rounded-xl">
+                                                        <span className="text-sm font-bold text-slate-800 truncate">{file.name}</span>
                                                         <button
                                                             onClick={() => fixPhotoBackground(file, idx)}
                                                             disabled={isFixingBg}
-                                                            className="text-xs bg-black hover:bg-zinc-800 text-white font-bold py-2 px-3 rounded flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                                                            className="text-xs bg-slate-900 hover:bg-black text-white font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-transform active:scale-95 disabled:opacity-50"
                                                         >
                                                             <Wand2 size={14} />
-                                                            {isFixingBg ? 'Processing...' : 'Auto-Fix Background'}
+                                                            {isFixingBg ? 'Processing WASM...' : 'Auto-Fix Background'}
                                                         </button>
                                                     </div>
                                                 );
@@ -481,37 +508,37 @@ export default function DocumentUploadPage() {
                                 </div>
                             </div>
                         )}
-                    </div>
+                    </motion.div>
                 )}
 
-                <div className="flex flex-col sm:flex-row gap-4 pt-8">
-                    <div className="flex flex-col flex-1 sm:flex-none sm:w-64 gap-1">
+                <div className="flex flex-col sm:flex-row items-center gap-4 pt-10 mt-6 border-t border-slate-200">
+                    <div className="w-full sm:w-auto grow max-w-sm flex flex-col gap-2">
                         <button
                             type="button"
                             onClick={handleExtractWithAI}
-                            className="btn-secondary w-full border-slate-300 text-slate-800 hover:bg-slate-50 shadow-sm"
+                            className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-slate-200 bg-white text-slate-800 font-bold hover:bg-slate-50 hover:border-slate-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                             disabled={isVerifying || selectedFiles.length === 0}
                         >
-                            <span className="font-bold flex items-center justify-center gap-2">
-                                <ShieldCheck size={18} className="text-emerald-600" />
-                                {isVerifying ? 'Extracting...' : 'Extract Applicant Data'}
-                            </span>
+                            <ShieldCheck size={18} className="text-[#1978E5]" />
+                            {isVerifying ? 'Extracting Core Data...' : 'Run Smart Extraction'}
                         </button>
-                        <p className="text-[11px] text-gray-500 text-left font-medium">
-                            Automatically parses details from Aadhaar/PAN
+                        <p className="text-xs text-slate-500 font-medium text-center">
+                            Auto-fills form instantly from documents
                         </p>
                     </div>
+
                     <button
                         type="button"
                         onClick={handleContinueToReview}
-                        className="btn-primary flex-1 shadow-md"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#1978E5] hover:bg-[#1461bd] text-white font-bold transition-transform active:scale-95 shadow-md shadow-blue-500/20 disabled:opacity-50 grow"
                         disabled={isVerifying}
                     >
-                        Continue to Application Form
-                        <ArrowRight size={18} className="ml-2" />
+                        Proceed to Main Application
+                        <ArrowRight size={18} />
                     </button>
                 </div>
             </motion.div>
+        </div>
         </div>
     );
 }

@@ -35,9 +35,9 @@ export default function HomePage() {
         { id: "passport", title: "Passport Services", desc: "Apply for new passport or renewal.", time: "~3 min", icon: <Shield size={24}/>, active: true },
         { id: "income", title: "Income Certificate", desc: "Get your income certificate online.", time: "~2 min", icon: <FileText size={24}/>, active: false },
         { id: "domicile", title: "Domicile Certificate", desc: "Apply for domicile certificate.", time: "~2 min", icon: <Home size={24}/>, active: false },
-        { id: "vehicle", title: "Vehicle Registration", desc: "Register new vehicle or transfer ownership.", time: "~4 min", icon: <Car size={24}/>, active: true },
-        { id: "business", title: "Business License", desc: "Apply for new business permits.", time: "~5 min", icon: <Handshake size={24}/>, active: true },
-        { id: "property", title: "Property Tax Payment", desc: "Pay your property taxes securely.", time: "~2 min", icon: <Landmark size={24}/>, active: true },
+        { id: "vehicle", title: "Vehicle Registration", desc: "Register new vehicle or transfer ownership.", time: "~4 min", icon: <Car size={24}/>, active: false },
+        { id: "business", title: "Business License", desc: "Apply for new business permits.", time: "~5 min", icon: <Handshake size={24}/>, active: false },
+        { id: "property", title: "Property Tax Payment", desc: "Pay your property taxes securely.", time: "~2 min", icon: <Landmark size={24}/>, active: false },
     ];
 
     return (
@@ -91,29 +91,58 @@ export default function HomePage() {
                         <p className="text-lg text-slate-500">Select any service to get started instantly.</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {services.map((service, i) => (
-                            <div key={i} className="pro-card p-8 flex flex-col h-full group hover:border-purple-200 transition-colors">
-                                <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-6">
-                                    {service.icon}
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-2">{service.title}</h3>
-                                <p className="text-slate-500 text-sm mb-6 grow leading-relaxed">{service.desc}</p>
-                                <div className="flex items-center justify-between mt-auto">
-                                    <span className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
-                                        <Clock size={14} /> {service.time}
-                                    </span>
-                                    {service.active ? (
-                                        <Link to={`/apply/${service.id}/state`} className="text-[#1978E5] font-semibold text-sm flex items-center gap-1 hover:text-[#1461bd] transition-colors">
-                                            Configure Module <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform"/>
-                                        </Link>
-                                    ) : (
-                                        <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-semibold">
-                                            Coming Soon
-                                        </span>
+                        {services.map((service, i) => {
+                            const CardWrapper = service.active ? Link : "div";
+                            const wrapperProps = service.active ? { to: `/apply/${service.id}/state` } : {};
+
+                            return (
+                                <CardWrapper 
+                                    key={i} 
+                                    {...wrapperProps}
+                                    className={`card p-8 flex flex-col h-full transition-all duration-300 relative overflow-hidden group ${
+                                        service.active 
+                                            ? 'cursor-pointer hover:-translate-y-1 hover:shadow-[0_20px_40px_-15px_rgba(25,120,229,0.15)] hover:border-[#1978E5]/30' 
+                                            : 'opacity-75 cursor-not-allowed bg-slate-50'
+                                    }`}
+                                >
+                                    {/* Top decorative hover line */}
+                                    {service.active && (
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-[#1978E5] to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                     )}
-                                </div>
-                            </div>
-                        ))}
+
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-6 transition-colors duration-300 ${
+                                        service.active
+                                            ? 'bg-blue-50 text-[#1978E5] group-hover:bg-[#1978E5] group-hover:text-white'
+                                            : 'bg-slate-100 text-slate-400'
+                                    }`}>
+                                        {service.icon}
+                                    </div>
+                                    <h3 className={`text-xl font-bold mb-2 transition-colors ${
+                                        service.active ? 'text-slate-900 group-hover:text-[#1978E5]' : 'text-slate-700'
+                                    }`}>
+                                        {service.title}
+                                    </h3>
+                                    <p className="text-slate-500 text-sm mb-6 grow leading-relaxed">{service.desc}</p>
+                                    
+                                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                                        <span className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
+                                            <Clock size={14} /> {service.time}
+                                        </span>
+                                        {service.active ? (
+                                            <div className="relative overflow-hidden w-20 h-6 flex justify-end">
+                                                <span className="text-[#1978E5] absolute right-0 font-semibold text-sm flex items-center gap-1 transition-all duration-300 transform translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100">
+                                                    Start <ArrowRight size={14} />
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-bold tracking-wider uppercase">
+                                                Coming Soon
+                                            </span>
+                                        )}
+                                    </div>
+                                </CardWrapper>
+                            );
+                        })}
                     </div>
                 </div>
             </section>
