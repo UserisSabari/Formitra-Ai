@@ -42,7 +42,7 @@ export default function Layout() {
                             className="flex items-center gap-2.5 cursor-pointer"
                             onClick={() => navigate('/')}
                         >
-                            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-sm">
+                            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-sm">
                                 <Sparkles size={18} className="text-white" />
                             </div>
                             <div className="flex items-baseline gap-1.5">
@@ -102,7 +102,7 @@ export default function Layout() {
                         {/* Brand */}
                         <div className="col-span-1 md:col-span-2">
                             <div className="flex items-center gap-2.5 mb-3">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-lg bg-linear-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
                                     <Sparkles size={16} className="text-white" />
                                 </div>
                                 <span className="text-lg font-semibold text-gray-900">Formitra AI</span>

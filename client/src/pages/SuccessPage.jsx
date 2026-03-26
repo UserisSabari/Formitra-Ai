@@ -111,7 +111,7 @@ export default function SuccessPage() {
                         <p className="text-gray-600 mb-6">Summarising your validation results...</p>
                         <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
                             <motion.div 
-                                className="h-full bg-gradient-to-r from-indigo-600 to-purple-600" 
+                                className="h-full bg-linear-to-r from-indigo-600 to-purple-600" 
                                 initial={{ width: '100%' }} 
                                 animate={{ width: `${(count / 3) * 100}%` }} 
                             />
@@ -161,7 +161,7 @@ export default function SuccessPage() {
                                         className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 border border-gray-200"
                                     >
                                         <div 
-                                            className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" 
+                                            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" 
                                             style={{ backgroundColor: `${step.color}15` }}
                                         >
                                             <StepIcon size={18} style={{ color: step.color }} />

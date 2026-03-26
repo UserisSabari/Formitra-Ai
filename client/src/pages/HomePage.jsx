@@ -43,7 +43,7 @@ export default function HomePage() {
     return (
         <div className="min-h-screen bg-[#fafbfc] text-[#334155] font-sans selection:bg-blue-100 selection:text-blue-900 pb-20">
             {/* Hero Section */}
-            <section className="relative pt-20 pb-20 lg:pt-32 lg:pb-32 overflow-hidden bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] min-h-[600px] flex flex-col justify-center">
+            <section className="relative pt-20 pb-20 lg:pt-32 lg:pb-32 overflow-hidden bg-linear-to-b from-[#f8fafc] to-[#f1f5f9] min-h-[600px] flex flex-col justify-center">
                 {/* Soft decorative background elements matching image */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#e0e7ff] rounded-full blur-[100px] opacity-70 -translate-y-1/2 translate-x-1/4 z-0"></div>
                 <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#f1f5f9] rounded-[3rem] rotate-45 blur-md opacity-80 translate-y-1/3 -translate-x-[40%] z-0 shadow-[inset_0_0_50px_rgba(0,0,0,0.05),0_0_50px_rgba(255,255,255,0.5)] border border-white"></div>
@@ -97,7 +97,7 @@ export default function HomePage() {
                                     {service.icon}
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 mb-2">{service.title}</h3>
-                                <p className="text-slate-500 text-sm mb-6 flex-grow leading-relaxed">{service.desc}</p>
+                                <p className="text-slate-500 text-sm mb-6 grow leading-relaxed">{service.desc}</p>
                                 <div className="flex items-center justify-between mt-auto">
                                     <span className="flex items-center gap-1.5 text-slate-400 text-xs font-medium">
                                         <Clock size={14} /> {service.time}
@@ -127,7 +127,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex flex-col md:flex-row justify-between items-center relative gap-12 md:gap-0 max-w-4xl mx-auto">
                         {/* Connecting Line */}
-                        <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-[1px] bg-slate-200 z-0"></div>
+                        <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-slate-200 z-0"></div>
                         
                         {/* Step 1 */}
                         <div className="flex flex-col items-center text-center relative z-10 w-full md:w-1/3">

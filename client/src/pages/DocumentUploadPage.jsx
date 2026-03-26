@@ -280,28 +280,28 @@ export default function DocumentUploadPage() {
                     </h3>
                     <ul className="space-y-3 text-sm text-gray-700">
                         <li className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded bg-zinc-100 border border-zinc-200 text-black flex items-center justify-center font-bold text-xs">1</span>
+                            <span className="shrink-0 w-6 h-6 rounded bg-zinc-100 border border-zinc-200 text-black flex items-center justify-center font-bold text-xs">1</span>
                             <div>
                                 <p className="font-semibold text-gray-900">Recent Passport-Sized Photograph <span className="text-red-500">*</span></p>
                                 <p className="text-gray-500">Color photo with a plain white or light background.</p>
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded bg-zinc-100 border border-zinc-200 text-black flex items-center justify-center font-bold text-xs">2</span>
+                            <span className="shrink-0 w-6 h-6 rounded bg-zinc-100 border border-zinc-200 text-black flex items-center justify-center font-bold text-xs">2</span>
                             <div>
                                 <p className="font-semibold text-gray-900">Proof of Address <span className="text-red-500">*</span></p>
                                 <p className="text-gray-500">E.g., Aadhaar Card, Voter ID, Electricity Bill, or Bank Passbook.</p>
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded bg-zinc-50 border border-zinc-100 text-zinc-500 flex items-center justify-center font-bold text-xs">3</span>
+                            <span className="shrink-0 w-6 h-6 rounded bg-zinc-50 border border-zinc-100 text-zinc-500 flex items-center justify-center font-bold text-xs">3</span>
                             <div>
                                 <p className="font-semibold text-gray-900">Proof of Date of Birth <span className="text-gray-400 font-normal">(Optional)</span></p>
                                 <p className="text-gray-500">E.g., Birth Certificate, PAN Card, or School Leaving Certificate.</p>
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded bg-zinc-50 border border-zinc-100 text-zinc-500 flex items-center justify-center font-bold text-xs">4</span>
+                            <span className="shrink-0 w-6 h-6 rounded bg-zinc-50 border border-zinc-100 text-zinc-500 flex items-center justify-center font-bold text-xs">4</span>
                             <div>
                                 <p className="font-semibold text-gray-900">Non-ECR Proof <span className="text-gray-400 font-normal">(Optional)</span></p>
                                 <p className="text-gray-500">10th Standard Marksheet or higher educational degree.</p>
@@ -350,7 +350,7 @@ export default function DocumentUploadPage() {
                             {selectedFiles.map((file, idx) => (
                                 <div key={idx} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
                                     <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-600 flex-shrink-0 font-bold text-xs uppercase">
+                                        <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-600 shrink-0 font-bold text-xs uppercase">
                                             {file.name.split('.').pop()}
                                         </div>
                                         <div className="flex flex-col">
@@ -415,7 +415,7 @@ export default function DocumentUploadPage() {
                 {/* High-level error banner for backend / network failures */}
                 {!isVerifying && aiPackageResult?.status === 'error' && (
                     <div className="p-4 rounded-md bg-red-50 border border-red-200 text-sm text-red-800 flex items-center gap-3 font-semibold">
-                        <AlertCircle size={20} className="text-red-500 flex-shrink-0" />
+                        <AlertCircle size={20} className="text-red-500 shrink-0" />
                         <div>{aiPackageResult.message}</div>
                     </div>
                 )}
@@ -424,7 +424,7 @@ export default function DocumentUploadPage() {
                     <div className="space-y-6 pt-4">
                         <div className="p-6 rounded-md border border-zinc-200 shadow-sm bg-white">
                             <div className="flex items-start gap-4">
-                                <CheckCircle className="text-black mt-1 flex-shrink-0" size={32} />
+                                <CheckCircle className="text-black mt-1 shrink-0" size={32} />
                                 <div>
                                     <h3 className="text-2xl font-black text-slate-900 leading-none mb-2 tracking-tight">Data Extracted Successfully</h3>
                                     <p className="text-sm font-semibold text-zinc-600">
@@ -451,7 +451,7 @@ export default function DocumentUploadPage() {
                         {selectedFiles.some(f => f.type.startsWith('image/')) && (
                             <div className="p-6 rounded-md border border-zinc-200 shadow-sm bg-zinc-50">
                                 <div className="flex items-start gap-4">
-                                    <div className="flex-shrink-0 mt-1 w-10 h-10 bg-black rounded flex items-center justify-center">
+                                    <div className="shrink-0 mt-1 w-10 h-10 bg-black rounded flex items-center justify-center">
                                         <Wand2 className="text-white" size={20} />
                                     </div>
                                     <div className="w-full">

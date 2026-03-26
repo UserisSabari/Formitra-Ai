@@ -100,7 +100,7 @@ export default function ReviewPage() {
                             }`}
                     >
                         <p className="text-xs text-gray-500 mb-1.5 font-medium">{formatLabel(key)}</p>
-                        <p className="text-gray-900 font-medium text-sm break-words">
+                        <p className="text-gray-900 font-medium text-sm wrap-break-word">
                             {formData[key] || '—'}
                         </p>
                     </div>
@@ -153,7 +153,7 @@ export default function ReviewPage() {
 
                                 <div className="p-5 rounded-xl border bg-emerald-50 border-emerald-200">
                                     <div className="flex items-start gap-3">
-                                        <CheckCircle className="text-emerald-500 mt-0.5 flex-shrink-0" size={24} />
+                                        <CheckCircle className="text-emerald-500 mt-0.5 shrink-0" size={24} />
                                         <div>
                                             <h3 className="font-bold text-emerald-900 text-lg">Extraction Successful</h3>
                                             <p className="text-sm text-emerald-800 mt-1 leading-relaxed font-medium">
@@ -188,7 +188,7 @@ export default function ReviewPage() {
                 {/* Info Box */}
                 <div className="card p-4 bg-blue-50 border-blue-200">
                     <div className="flex items-start gap-3">
-                        <CheckCircle2 size={20} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                        <CheckCircle2 size={20} className="text-blue-600 mt-0.5 shrink-0" />
                         <div className="text-sm text-blue-900">
                             <p className="font-medium mb-1">Pre-submission check only</p>
                             <p className="text-blue-700">
