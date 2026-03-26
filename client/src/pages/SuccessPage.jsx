@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CheckCircle2, ExternalLink, ArrowRight, Smartphone, Key, Sparkles, Rocket, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, ExternalLink, ArrowRight, Smartphone, Key, Sparkles, Rocket, ShieldCheck, AlertTriangle } from 'lucide-react';
 import ValidationSummaryPanel from '../components/ValidationSummaryPanel';
 
 const LOCAL_STORAGE_DOC_VALIDATION_KEY = 'formitra_document_validation';
@@ -78,52 +78,55 @@ export default function SuccessPage() {
     };
 
     return (
-        <div className="container py-12">
+        <div className="min-h-screen bg-[#fafbfc] py-12 pb-24 flex items-center justify-center">
             <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
-                className="max-w-2xl mx-auto text-center space-y-8"
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="w-full max-w-2xl mx-auto text-center space-y-8 px-4"
             >
                 {/* Success Icon */}
                 <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', duration: 0.6 }}
-                    className="w-20 h-20 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-center mx-auto"
+                    className="w-24 h-24 rounded-3xl bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center mx-auto shadow-sm"
                 >
-                    <CheckCircle2 size={48} className="text-emerald-600" />
+                    <CheckCircle2 size={56} className="text-emerald-500" strokeWidth={2.5} />
                 </motion.div>
 
                 {/* Title */}
-                <div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                        Pre-submission checks completed
+                <div className="space-y-3">
+                    <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+                        Clearance Granted
                     </h1>
-                    <p className="text-lg text-gray-600">
-                        Your application data and supporting documents have been reviewed with basic, assistive checks.
+                    <p className="text-lg text-slate-500 font-medium max-w-xl mx-auto">
+                        Your intelligence package has successfully cleared automated baseline validation protocols.
                     </p>
                 </div>
 
                 {/* Countdown or Guide */}
                 {!showGuide ? (
-                    <div className="card p-8">
-                        <div className="text-5xl font-bold text-gradient mb-4">{count}</div>
-                        <p className="text-gray-600 mb-6">Summarising your validation results...</p>
-                        <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div className="bg-white p-12 rounded-3xl shadow-soft border border-slate-200">
+                        <div className="text-6xl font-black text-transparent bg-clip-text bg-linear-to-r from-[#1978E5] to-purple-600 mb-6 font-mono tracking-tighter">
+                            {count}
+                        </div>
+                        <p className="text-slate-500 mb-8 font-medium text-lg">Finalizing and encrypting your packet transmission...</p>
+                        <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden shadow-inner relative">
                             <motion.div 
-                                className="h-full bg-linear-to-r from-indigo-600 to-purple-600" 
+                                className="absolute inset-y-0 left-0 bg-linear-to-r from-[#1978E5] to-purple-500" 
                                 initial={{ width: '100%' }} 
                                 animate={{ width: `${(count / 3) * 100}%` }} 
+                                transition={{ ease: "linear" }}
                             />
                         </div>
                     </div>
                 ) : (
-                    <div className="card p-6 md:p-8 space-y-6">
-                        <div className="flex items-center justify-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center">
-                                <ShieldCheck size={20} className="text-indigo-600" />
+                    <div className="bg-white p-6 md:p-10 rounded-3xl shadow-soft border border-slate-200 space-y-8">
+                        <div className="flex items-center justify-center gap-3 border-b border-slate-100 pb-6">
+                            <div className="w-12 h-12 rounded-xl bg-[#1978E5]/10 border border-[#1978E5]/20 flex items-center justify-center shadow-inner">
+                                <ShieldCheck size={24} className="text-[#1978E5]" strokeWidth={2} />
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900">Summary & Next Steps</h3>
+                            <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">Mission Briefing</h3>
                         </div>
 
                         {docValidation && (
@@ -133,23 +136,24 @@ export default function SuccessPage() {
                             />
                         )}
 
-                        <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 text-left text-sm text-blue-900 space-y-1.5">
-                            <p className="font-semibold">Academic and ethical scope</p>
-                            <p>
-                                Formitra assists you by checking for obvious issues in your data and documents. It does
-                                not bypass OTP, CAPTCHA, or any security controls, and it never submits forms on your behalf.
+                        <div className="rounded-2xl bg-blue-50/50 border border-[#1978E5]/20 p-5 text-left text-sm text-slate-700 space-y-2">
+                            <p className="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                                <AlertTriangle size={18} className="text-[#1978E5]" /> Operating Parameters
                             </p>
-                            <p>
-                                Always verify your details and documents carefully on the official Passport Seva portal before final submission.
+                            <p className="font-medium leading-relaxed">
+                                Formitra securely stages your exact identity variables to accelerate government ingestion workflows. <strong className="font-bold text-slate-900">We do not bypass OTPs, Captchas, or submit anything.</strong>
+                            </p>
+                            <p className="font-medium leading-relaxed text-[#1978E5]">
+                                Final submission is your sole responsibility.
                             </p>
                         </div>
 
                         <div className="space-y-3 text-left">
                             {[
-                                { icon: Rocket, text: 'Open the mock Passport Seva portal in your browser (demo only)', color: '#4f46e5' },
-                                { icon: Smartphone, text: 'If you have the Formitra helper extension installed, open it on the portal page', color: '#7c3aed' },
-                                { icon: Sparkles, text: hasExtension ? 'Use the extension to assist with filling fields (no auto-submission)' : 'Manually enter details carefully, referring to this Formitra summary', color: '#059669' },
-                                { icon: Key, text: 'Enter OTP and complete all security steps directly on the official portal', color: '#f59e0b' }
+                                { icon: Rocket, text: 'Deploy to the external target portal instance.', color: '#1978E5' },
+                                { icon: Smartphone, text: 'Locate the Formitra Chrome Node located in your top-right browser extensions.', color: '#8b5cf6' },
+                                { icon: Sparkles, text: hasExtension ? 'Execute the node to auto-inject your package into the portal structure.' : 'Since the node is missing, perform manual transcription of the variables.', color: '#10b981' },
+                                { icon: Key, text: 'Resolve target security gates (OTP/Captcha) manually.', color: '#f59e0b' }
                             ].map((step, i) => {
                                 const StepIcon = step.icon;
                                 return (
@@ -158,45 +162,44 @@ export default function SuccessPage() {
                                         initial={{ opacity: 0, x: -20 }} 
                                         animate={{ opacity: 1, x: 0 }} 
                                         transition={{ delay: i * 0.1 }}
-                                        className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 border border-gray-200"
+                                        className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors"
                                     >
                                         <div 
-                                            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" 
-                                            style={{ backgroundColor: `${step.color}15` }}
+                                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-white border border-slate-100" 
                                         >
-                                            <StepIcon size={18} style={{ color: step.color }} />
+                                            <StepIcon size={20} style={{ color: step.color }} strokeWidth={2.5} />
                                         </div>
-                                        <span className="text-gray-700 font-medium">{step.text}</span>
+                                        <span className="text-slate-800 font-bold">{step.text}</span>
                                     </motion.div>
                                 );
                             })}
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                        <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-100">
                             <button
                                 type="button"
                                 onClick={() => navigate('/mock-portal')}
-                                className="btn-primary flex-1"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#1978E5] hover:bg-[#1461bd] text-white font-bold transition-transform active:scale-95 shadow-md shadow-blue-500/20 flex-1"
                             >
                                 <Rocket size={18} />
-                                Open Mock Portal
+                                Launch Target Portal
                                 <ExternalLink size={16} />
                             </button>
                             {!hasExtension && (
                                 <button
                                     type="button"
                                     onClick={handleSimulateExtensionInstall}
-                                    className="btn-secondary flex-1"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border-2 border-slate-200 bg-white text-slate-700 font-bold hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm flex-1"
                                 >
-                                    Simulate Extension Installed (demo)
+                                    Activate Demo Extension
                                     <Smartphone size={18} />
                                 </button>
                             )}
                             <button 
                                 onClick={handleComplete}
-                                className="btn-secondary flex-1"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border-2 border-slate-200 bg-white text-slate-700 font-bold hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm"
                             >
-                                New Application
+                                Return
                                 <ArrowRight size={18} />
                             </button>
                         </div>

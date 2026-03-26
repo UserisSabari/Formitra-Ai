@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, ShieldCheck, UploadCloud, AlertCircle, CheckCircle, FileText, Wand2, Sparkles, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShieldCheck, UploadCloud, AlertTriangle, CheckCircle, FileText, Wand2, Sparkles, ChevronRight } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import { removeBackground } from '@imgly/background-removal';
 import { AI_API_BASE_URL } from '../config/api';
@@ -441,7 +441,7 @@ export default function DocumentUploadPage() {
                 {!isVerifying && aiPackageResult?.status === 'error' && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-5 rounded-xl bg-red-50 border border-red-200 text-sm text-red-800 flex items-center gap-4 font-semibold shadow-sm">
                         <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                            <AlertCircle size={20} className="text-red-500" />
+                            <AlertTriangle size={20} className="text-red-500" />
                         </div>
                         <div className="leading-relaxed">{aiPackageResult.message}</div>
                     </motion.div>
